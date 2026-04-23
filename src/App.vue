@@ -197,7 +197,8 @@ onUnmounted(() => {
 /* Ensure background printing works */
 @media print {
   @page {
-    margin: 0.5cm;
+    /* 浏览器系统页边距（设为0可隐藏系统页眉页脚） */
+    margin: 0;
   }
   * {
     -webkit-print-color-adjust: exact !important;
@@ -212,6 +213,14 @@ onUnmounted(() => {
     overflow: visible !important;
     height: auto !important;
     min-height: auto !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* 暴力接管打印边界：强制设立标准的上下、左右物理留白 */
+  .print-container {
+    padding: 20mm 25mm !important; 
+    width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
   }
 }
