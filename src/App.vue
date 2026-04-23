@@ -154,8 +154,8 @@ onUnmounted(() => {
 
       <!-- Preview Pane -->
       <section ref="previewContainer" class="flex-1 bg-slate-200 py-4 md:py-8 overflow-y-auto print:overflow-visible print:p-0 print:block custom-scrollbar flex flex-col items-center">
-        <div class="origin-top" :style="{ transform: `scale(${previewScale})`, width: '210mm', marginBottom: previewScale < 1 ? `-${(1 - previewScale) * 100}%` : '0' }">
-          <CvPreview :data="cvData" class="shadow-2xl print:shadow-none bg-white print:rounded-none print:m-0 w-full" />
+        <div class="origin-top print:!transform-none print:!w-auto print:!m-0 print:block w-[210mm]" :style="{ transform: `scale(${previewScale})`, marginBottom: previewScale < 1 ? `-${(1 - previewScale) * 100}%` : '0' }">
+          <CvPreview :data="cvData" class="shadow-2xl print:shadow-none bg-white w-full" />
         </div>
       </section>
     </main>
@@ -192,9 +192,16 @@ onUnmounted(() => {
 
 /* Ensure background printing works */
 @media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+  body {
+    background-color: white !important;
   }
 }
 </style>
