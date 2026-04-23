@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write # 允许工作流向 gh-pages 分支推送代码
+  pages: write
+  id-token: write
 
 jobs:
   build-and-deploy:
