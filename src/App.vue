@@ -197,8 +197,8 @@ onUnmounted(() => {
 /* Ensure background printing works */
 @media print {
   @page {
-    /* 浏览器系统页边距（设为0可隐藏系统页眉页脚） */
-    margin: 0;
+    /* 将物理页边距交还给浏览器控制，解决分页后中间页面无边距的问题 */
+    margin: 20mm 25mm !important;
   }
   * {
     -webkit-print-color-adjust: exact !important;
@@ -216,9 +216,9 @@ onUnmounted(() => {
     box-sizing: border-box !important;
   }
   
-  /* 暴力接管打印边界：强制设立标准的上下、左右物理留白 */
+  /* 容器去掉 padding，以免和 @page 的边距在第一页和最后一页发生双重叠加 */
   .print-container {
-    padding: 20mm 25mm !important; 
+    padding: 0 !important; 
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;

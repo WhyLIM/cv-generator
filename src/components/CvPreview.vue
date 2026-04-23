@@ -247,6 +247,17 @@ const cssVars = computed(() => {
       <span v-if="data.personal.showLastModified !== false">{{ data.personal.lastModifiedText || 'Last modified: 2026.04.23' }}</span>
     </div>
     <div v-else class="mt-8 pt-4 border-t border-transparent text-[8px] print:hidden mt-auto"></div>
-
   </div>
 </template>
+
+<style scoped>
+/* 防止在打印时发生尴尬的段落中断 */
+:deep(section), :deep(.mb-6) {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+:deep(h2), :deep(h3) {
+  page-break-after: avoid;
+  break-after: avoid;
+}
+</style>
