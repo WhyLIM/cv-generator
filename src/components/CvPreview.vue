@@ -19,7 +19,7 @@ const cssVars = computed(() => {
 </script>
 
 <template>
-  <div class="print-container bg-white text-slate-800 w-[210mm] min-h-[297mm] print:w-auto print:min-h-0 mx-auto p-10 md:p-14 print:px-14 print:py-10 block text-[13px] md:text-[14px] leading-relaxed" :style="cssVars">
+  <div class="print-container bg-white text-slate-800 w-[210mm] min-h-[297mm] print:w-[210mm] print:min-h-0 mx-auto p-10 md:p-14 print:px-14 print:py-10 block text-[13px] md:text-[14px] leading-relaxed" :style="cssVars">
     
     <!-- PROFILE PHOTO (Floated Top-Right) -->
     <div v-if="data.personal.showPhoto && data.personal.photoUrl" class="float-right ml-6 mb-2 mt-2 w-[26mm] h-[36mm] shrink-0 border border-slate-200 p-0.5 bg-white shadow-sm relative z-10">
