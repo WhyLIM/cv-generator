@@ -23,7 +23,11 @@ const handleIconClick = (tabId: string) => {
 
 const handlePrint = () => {
   try {
+    // Determine the exact dimensions to lock the scale and avoid bleeding
+    // Setting body zoom to 1 or forcing container to not be constrained
+    document.body.classList.add('is-printing');
     window.print();
+    document.body.classList.remove('is-printing');
   } catch (e) {
     alert("Printing might be blocked in this preview window. Please use 'Open app in a new tab' (top right of the editor) and try again.");
   }
@@ -153,9 +157,9 @@ onUnmounted(() => {
       </aside>
 
       <!-- Preview Pane -->
-      <section ref="previewContainer" class="flex-1 bg-slate-200 py-4 md:py-8 overflow-y-auto print:overflow-visible print:w-[210mm] print:p-0 print:block custom-scrollbar flex flex-col items-center print:bg-white print:!absolute print:!top-0 print:!left-0 print:z-50">
-        <div class="origin-top print:!transform-none print:w-[210mm] print:!m-0 print:block w-[210mm]" :style="{ transform: `scale(${previewScale})`, marginBottom: previewScale < 1 ? `-${(1 - previewScale) * 100}%` : '0' }">
-          <CvPreview :data="cvData" class="shadow-2xl print:shadow-none bg-white w-full print:w-[210mm]" />
+      <section ref="previewContainer" class="flex-1 bg-slate-200 py-4 md:py-8 overflow-y-auto print:overflow-visible print:w-full print:p-0 print:block custom-scrollbar flex flex-col items-center print:bg-white print:!absolute print:!top-0 print:!left-0 print:z-50">
+        <div class="origin-top print:!transform-none print:w-full print:!m-0 print:block w-[210mm]" :style="{ transform: `scale(${previewScale})`, marginBottom: previewScale < 1 ? `-${(1 - previewScale) * 100}%` : '0' }">
+          <CvPreview :data="cvData" class="shadow-2xl print:shadow-none bg-white w-full print:w-full" />
         </div>
       </section>
     </main>
@@ -193,15 +197,15 @@ onUnmounted(() => {
 /* Ensure background printing works */
 @media print {
   @page {
-    size: A4 portrait;
-    margin: 0;
+    margin: 0.5cm;
   }
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
   html, body, #app, main {
-    width: 210mm !important;
+    width: 100% !important;
+    max-width: 100% !important;
     background-color: white !important;
     margin: 0 !important;
     padding: 0 !important;
