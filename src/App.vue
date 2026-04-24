@@ -55,7 +55,7 @@ const handleImportJson = (event: Event) => {
       const parsedData = JSON.parse(e.target?.result as string);
       if (parsedData && parsedData.personal && parsedData.themeColor) {
         cvData.value = parsedData;
-        
+
         // Reset the file input so the same file could theoretically be uploaded again
         if (target) target.value = '';
       } else {
@@ -68,39 +68,16 @@ const handleImportJson = (event: Event) => {
   reader.readAsText(file);
 };
 
-// Auto scaling for preview
-const previewContainer = ref<HTMLElement | null>(null);
-const previewScale = ref(1);
-let resizeObserver: ResizeObserver | null = null;
-
-onMounted(() => {
-  resizeObserver = new ResizeObserver((entries) => {
-    for (let entry of entries) {
-       const wrapperWidth = entry.contentRect.width;
-       // 210mm paper width is exactly ~794px. We add 64px max margin minimum padding constraint
-       if (wrapperWidth < 858) {
-         previewScale.value = (wrapperWidth - 32) / 794;
-       } else {
-         previewScale.value = 1;
-       }
-    }
-  });
-  if (previewContainer.value) {
-    resizeObserver.observe(previewContainer.value);
-  }
-});
-
-onUnmounted(() => {
-  if (resizeObserver) resizeObserver.disconnect();
-});
 </script>
 
 <template>
-  <div class="flex flex-col h-screen print:h-auto bg-slate-50 text-slate-800 font-sans overflow-hidden print:overflow-visible print:block">
+  <div
+    class="flex flex-col h-screen print:h-auto bg-slate-50 text-slate-800 font-sans overflow-hidden print:overflow-visible print:block">
     <!-- Header Bar -->
     <header class="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200 no-print shrink-0">
       <div class="flex items-center gap-3">
-        <h1 class="text-lg font-semibold tracking-tight text-slate-900">CV <span style="color: #01a3a4">Generator</span></h1>
+        <h1 class="text-lg font-semibold tracking-tight text-slate-900">CV <span style="color: #01a3a4">Generator</span>
+        </h1>
       </div>
       <div class="flex items-center gap-3 text-sm text-slate-500 font-medium">
         Personal CV Generator
@@ -110,46 +87,68 @@ onUnmounted(() => {
     <!-- Main Editor Layout -->
     <main class="flex flex-1 min-h-0 overflow-hidden print:overflow-visible print:block">
       <!-- Sidebar Navigation -->
-      <nav class="w-16 border-r border-slate-200 bg-white flex flex-col items-center py-4 gap-6 no-print shrink-0 cursor-pointer select-none">
-        <div @click="handleIconClick('personal')" :class="activeTab === 'personal' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'" class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Personal Info">
+      <nav
+        class="w-16 border-r border-slate-200 bg-white flex flex-col items-center py-4 gap-6 no-print shrink-0 cursor-pointer select-none">
+        <div @click="handleIconClick('personal')"
+          :class="activeTab === 'personal' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'"
+          class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Personal Info">
           <i class="fa-solid fa-user"></i>
         </div>
-        <div @click="handleIconClick('education')" :class="activeTab === 'education' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'" class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Education & Skills">
+        <div @click="handleIconClick('education')"
+          :class="activeTab === 'education' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'"
+          class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Education & Skills">
           <i class="fa-solid fa-graduation-cap"></i>
         </div>
-        <div @click="handleIconClick('employment')" :class="activeTab === 'employment' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'" class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Employment History">
+        <div @click="handleIconClick('employment')"
+          :class="activeTab === 'employment' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'"
+          class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Employment History">
           <i class="fa-solid fa-briefcase"></i>
         </div>
-        <div @click="handleIconClick('articles')" :class="activeTab === 'articles' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'" class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Publications & Conferences">
+        <div @click="handleIconClick('articles')"
+          :class="activeTab === 'articles' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'"
+          class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+          title="Publications & Conferences">
           <i class="fa-solid fa-file-lines"></i>
         </div>
-        <div @click="handleIconClick('other')" :class="activeTab === 'other' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'" class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Awards & Honors">
+        <div @click="handleIconClick('other')"
+          :class="activeTab === 'other' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'"
+          class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Awards & Honors">
           <i class="fa-solid fa-star"></i>
         </div>
-        <div @click="handleIconClick('custom')" :class="activeTab === 'custom' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'" class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Custom Sections">
+        <div @click="handleIconClick('custom')"
+          :class="activeTab === 'custom' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'"
+          class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Custom Sections">
           <i class="fa-solid fa-shapes"></i>
         </div>
-        <div @click="handleIconClick('settings')" :class="activeTab === 'settings' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'" class="mt-auto w-10 h-10 rounded-lg flex items-center justify-center transition-colors" title="Settings & JSON Data">
+        <div @click="handleIconClick('settings')"
+          :class="activeTab === 'settings' ? 'bg-[#e6f6f6] text-[#01a3a4] text-lg' : 'text-slate-400 hover:bg-slate-50 text-lg'"
+          class="mt-auto w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+          title="Settings & JSON Data">
           <i class="fa-solid fa-gear"></i>
         </div>
       </nav>
 
       <!-- Editor Pane -->
-      <aside class="w-[450px] md:w-[500px] min-w-[350px] border-r border-slate-200 bg-white flex flex-col z-10 shrink-0 no-print shadow-sm h-full relative">
+      <aside
+        class="w-[450px] md:w-[500px] min-w-[350px] border-r border-slate-200 bg-white flex flex-col z-10 shrink-0 no-print shadow-sm h-full relative">
         <div class="h-14 border-b border-slate-200 bg-white flex justify-between items-center px-4 shrink-0">
-           <h2 class="text-sm font-bold text-slate-700 capitalize w-20"><i class="fa-solid fa-pen-to-square text-[#01a3a4] mr-1.5 hidden sm:inline"></i> {{ activeTab }}</h2>
-           <div class="flex items-center gap-2">
-             <input type="file" id="import-json" accept=".json" class="hidden" @change="handleImportJson" />
-             <label for="import-json" class="px-2 py-1.5 text-[11px] font-semibold text-slate-600 rounded bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm cursor-pointer whitespace-nowrap">
-               <i class="fa-solid fa-file-import mr-1"></i> <span class="hidden sm:inline">Import JSON</span>
-             </label>
-             <button @click="handleExportJson" class="px-2 py-1.5 text-[11px] font-semibold text-slate-600 rounded bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm whitespace-nowrap">
-               <i class="fa-solid fa-file-export mr-1"></i> <span class="hidden sm:inline">Export JSON</span>
-             </button>
-             <button @click="handlePrint" class="px-2 py-1.5 text-[11px] font-semibold text-white rounded bg-[#01a3a4] hover:bg-[#01a3a4]/90 transition-colors shadow-sm whitespace-nowrap border border-[#01a3a4]">
-               <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden sm:inline">PDF</span>
-             </button>
-           </div>
+          <h2 class="text-sm font-bold text-slate-700 capitalize w-20"><i
+              class="fa-solid fa-pen-to-square text-[#01a3a4] mr-1.5 hidden sm:inline"></i> {{ activeTab }}</h2>
+          <div class="flex items-center gap-2">
+            <input type="file" id="import-json" accept=".json" class="hidden" @change="handleImportJson" />
+            <label for="import-json"
+              class="px-2 py-1.5 text-[11px] font-semibold text-slate-600 rounded bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm cursor-pointer whitespace-nowrap">
+              <i class="fa-solid fa-file-import mr-1"></i> <span class="hidden sm:inline">Import JSON</span>
+            </label>
+            <button @click="handleExportJson"
+              class="px-2 py-1.5 text-[11px] font-semibold text-slate-600 rounded bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm whitespace-nowrap">
+              <i class="fa-solid fa-file-export mr-1"></i> <span class="hidden sm:inline">Export JSON</span>
+            </button>
+            <button @click="handlePrint"
+              class="px-2 py-1.5 text-[11px] font-semibold text-white rounded bg-[#01a3a4] hover:bg-[#01a3a4]/90 transition-colors shadow-sm whitespace-nowrap border border-[#01a3a4]">
+              <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden sm:inline">PDF</span>
+            </button>
+          </div>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto bg-slate-50 custom-scrollbar">
           <CvEditor v-model="cvData" :activeTab="activeTab" class="w-full border-none shadow-none" />
@@ -157,15 +156,17 @@ onUnmounted(() => {
       </aside>
 
       <!-- Preview Pane -->
-      <section ref="previewContainer" class="flex-1 bg-slate-200 py-4 md:py-8 overflow-y-auto print:overflow-visible print:w-full print:p-0 print:block custom-scrollbar flex flex-col items-center print:bg-white print:!absolute print:!top-0 print:!left-0 print:z-50">
-        <div class="origin-top print:!transform-none print:w-full print:!m-0 print:block w-[210mm]" :style="{ transform: `scale(${previewScale})`, marginBottom: previewScale < 1 ? `-${(1 - previewScale) * 100}%` : '0' }">
+      <section
+        class="flex-1 bg-slate-200 py-4 md:py-8 overflow-y-auto print:overflow-visible print:w-full print:p-0 print:block custom-scrollbar flex flex-col items-center print:bg-white print:!absolute print:!top-0 print:!left-0 print:z-50">
+        <div class="print:w-full print:!m-0 print:block w-[210mm]">
           <CvPreview :data="cvData" class="shadow-2xl print:shadow-none bg-white w-full print:w-full" />
         </div>
       </section>
     </main>
 
     <!-- Status Bar -->
-    <footer class="px-4 py-1.5 bg-white border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 no-print shrink-0">
+    <footer
+      class="px-4 py-1.5 bg-white border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 no-print shrink-0">
       <div class="flex items-center gap-4">
         <span>Mode: <span class="font-medium italic" style="color: #01a3a4">Visual Design</span></span>
         <span>Auto-save: <span class="font-medium" style="color: #01a3a4">Active</span></span>
@@ -183,13 +184,16 @@ onUnmounted(() => {
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: #e2e8f0;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: #94a3b8;
   border-radius: 5px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
@@ -200,11 +204,16 @@ onUnmounted(() => {
     /* 将物理页边距交还给浏览器控制，解决分页后中间页面无边距的问题 */
     margin: 20mm 25mm !important;
   }
+
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  html, body, #app, main {
+
+  html,
+  body,
+  #app,
+  main {
     width: 100% !important;
     max-width: 100% !important;
     background-color: white !important;
@@ -215,13 +224,45 @@ onUnmounted(() => {
     min-height: auto !important;
     box-sizing: border-box !important;
   }
-  
+
   /* 容器去掉 padding，以免和 @page 的边距在第一页和最后一页发生双重叠加 */
   .print-container {
-    padding: 0 !important; 
+    padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    /* 打印时应用字体缩放 */
+    zoom: var(--font-scale, 1) !important;
+  }
+
+  /* 增强分页控制 - 防止区域被分割到两页 */
+  section {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    orphans: 10 !important;
+    widows: 10 !important;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    break-after: avoid !important;
+    break-before: avoid !important;
+    orphans: 10 !important;
+    widows: 10 !important;
+  }
+
+  /* 确保区域内所有子元素也不会被分割 */
+  section>* {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 防止文章条目被分割 */
+  .break-inside-avoid-page {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 }
 </style>

@@ -2,6 +2,7 @@ import { CvData } from './types';
 
 export const defaultData: CvData = {
   themeColor: '#01a3a4',
+  fontScale: 1,
   personal: {
     name: 'Min Li',
     nameZh: '李旻',

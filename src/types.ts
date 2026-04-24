@@ -97,6 +97,7 @@ export interface CustomSection {
 
 export interface CvData {
   themeColor: string;
+  fontScale?: number; // 字体缩放比例，默认 1.0
   personal: {
     name: string;
     nameZh?: string;
