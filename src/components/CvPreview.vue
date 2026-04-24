@@ -293,12 +293,12 @@ const cssVars = computed(() => {
     <!-- Bottom page indicator for UI feel -->
     <div class="flex-grow"></div>
     <div v-if="data.personal.showFooterTitle !== false || data.personal.showLastModified !== false"
-      class="mt-8 pt-4 border-t border-slate-100 flex justify-between text-[8px] text-slate-300 uppercase tracking-widest print:hidden mt-auto">
+      class="mt-8 pt-4 border-t border-slate-200 flex justify-between text-[9px] text-slate-400 uppercase tracking-widest mt-auto">
       <span v-if="data.personal.showFooterTitle !== false">{{ data.personal.footerTitle || 'Curriculum Vitae' }}</span>
       <span v-else></span>
       <span v-if="data.personal.showLastModified !== false">{{ data.personal.lastModifiedText || 'Last modified: 2026.04.23' }}</span>
     </div>
-    <div v-else class="mt-8 pt-4 border-t border-transparent text-[8px] print:hidden mt-auto"></div>
+    <div v-else class="mt-8 pt-4 border-t border-transparent text-[8px] mt-auto"></div>
   </div>
 </template>
 
