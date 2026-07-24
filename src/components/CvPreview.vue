@@ -96,6 +96,9 @@ const cssVars = computed(() => {
             <p class="text-[12px] text-slate-600">
               {{ em.institution }}, {{ em.location }}
             </p>
+            <p v-if="em.description" class="text-xs text-slate-600 leading-relaxed mt-1">
+              {{ em.description }}
+            </p>
           </div>
         </div>
       </section>

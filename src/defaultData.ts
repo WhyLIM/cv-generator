@@ -49,7 +49,8 @@ export const defaultData: CvData = {
       institution: 'Institute of Scientific Instruments (Preparatory), Shenzhen Institute of Advanced Technology (SIAT), Chinese Academy of Sciences',
       location: 'Shenzhen, Guangdong, China',
       startDate: 'July 2025',
-      endDate: 'present'
+      endDate: 'present',
+      description: ''
     },
     {
       id: 'em2',
@@ -57,7 +58,8 @@ export const defaultData: CvData = {
       institution: 'Medical Research Institute, Guangdong Provincial People\'s Hospital (Guangdong Academy of Medical Sciences), Southern Medical University',
       location: 'Guangzhou, Guangdong, China',
       startDate: 'April 2023',
-      endDate: 'May 2025'
+      endDate: 'May 2025',
+      description: ''
     }
   ],
   skills: [

@@ -4,6 +4,9 @@ import EditorSection from './EditorSection.vue';
 import IconPicker from './IconPicker.vue';
 import type { CvData } from '../types';
 import { parseBibtex } from '../lib/bibtex';
+import { useLocale } from '../composables/useLocale';
+
+const { t } = useLocale();
 
 const props = defineProps<{
   modelValue: CvData;
@@ -158,21 +161,21 @@ const handlePhotoUpload = (event: Event) => {
 
     <!-- PERSONAL TAB -->
     <template v-if="activeTab === 'personal'">
-      <EditorSection title="Personal Information" :data="data.personal" @update="data.personal = $event">
+      <EditorSection :title="t('personal')" :data="data.personal" @update="data.personal = $event">
         <div class="grid grid-cols-2 gap-4">
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Name</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('name') }}</label><input
               v-model="data.personal.name"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Name (Zh)</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('name') }} (Zh)</label><input
               v-model="data.personal.nameZh"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Document Title</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('documentTitle') || 'Document Title' }}</label><input
               v-model="data.personal.documentTitle" :disabled="!data.personal.showDocumentTitle"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Show Doc Title</label>
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showDocTitle') }}</label>
             <div class="h-[34px] flex items-center">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" v-model="data.personal.showDocumentTitle" class="sr-only peer">
@@ -180,31 +183,31 @@ const handlePhotoUpload = (event: Event) => {
                   class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01a3a4]">
                 </div>
                 <span class="ml-2 text-xs text-slate-600 font-medium whitespace-nowrap">{{
-                  data.personal.showDocumentTitle ? 'Enabled' : 'Disabled' }}</span>
+                  data.personal.showDocumentTitle ? t('enabled') : t('disabled') }}</span>
               </label>
             </div>
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Phone</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('phone') }}</label><input
               v-model="data.personal.phone"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Email</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('email') }}</label><input
               v-model="data.personal.email"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Github (Label)</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('github') }}</label><input
               v-model="data.personal.github"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Github URL</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('githubUrl') }}</label><input
               v-model="data.personal.githubUrl"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Website (Label)</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('website') }}</label><input
               v-model="data.personal.website"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Website URL</label><input
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('websiteUrl') }}</label><input
               v-model="data.personal.websiteUrl"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
@@ -212,12 +215,12 @@ const handlePhotoUpload = (event: Event) => {
       </EditorSection>
 
       <div class="mt-6">
-        <EditorSection title="Profile Photo" :data="data.personal" @update="data.personal = $event">
+        <EditorSection :title="t('profilePhoto')" :data="data.personal" @update="data.personal = $event">
           <div class="flex flex-col gap-4">
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" v-model="data.personal.showPhoto"
                 class="w-4 h-4 text-[#01a3a4] rounded border-slate-300 focus:ring-[#01a3a4]">
-              <span class="text-xs font-bold text-slate-700">Display Profile Photo on CV</span>
+              <span class="text-xs font-bold text-slate-700">{{ t('displayPhoto') }}</span>
             </label>
             <div v-if="data.personal.showPhoto"
               class="p-3 border border-slate-200 rounded-lg bg-slate-50 flex items-start gap-4">
@@ -230,11 +233,10 @@ const handlePhotoUpload = (event: Event) => {
                 <i class="fa-solid fa-user"></i>
               </div>
               <div class="flex-1">
-                <label class="block text-[10px] text-slate-500 mb-1 font-bold">Upload Photo</label>
+                <label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('uploadPhoto') }}</label>
                 <input type="file" accept="image/*" @change="handlePhotoUpload"
                   class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-[#01a3a4] file:text-white hover:file:bg-[#01a3a4]/90 focus:outline-none">
-                <p class="text-[9px] text-slate-400 mt-1">Recommended aspect ratio: 3:4. The image is saved directly in
-                  the browser using Base64 format.</p>
+                <p class="text-[9px] text-slate-400 mt-1">{{ t('photoAspectRatio') }}</p>
               </div>
             </div>
           </div>
@@ -242,13 +244,13 @@ const handlePhotoUpload = (event: Event) => {
       </div>
 
       <div class="mt-6">
-        <EditorSection title="Footer Content" :data="data.personal" @update="data.personal = $event">
+        <EditorSection :title="t('footerContent')" :data="data.personal" @update="data.personal = $event">
           <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Footer Title</label><input
+            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('footerTitle') }}</label><input
                 v-model="data.personal.footerTitle" :disabled="!data.personal.showFooterTitle"
                 class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
             </div>
-            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Show Footer Title</label>
+            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showFooterTitle') }}</label>
               <div class="h-[34px] flex items-center">
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" v-model="data.personal.showFooterTitle" class="sr-only peer">
@@ -256,24 +258,24 @@ const handlePhotoUpload = (event: Event) => {
                     class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01a3a4]">
                   </div>
                   <span class="ml-2 text-xs text-slate-600 font-medium whitespace-nowrap">{{
-                    data.personal.showFooterTitle ? 'Enabled' : 'Disabled' }}</span>
+                    data.personal.showFooterTitle ? t('enabled') : t('disabled') }}</span>
                 </label>
               </div>
             </div>
             <div>
-              <label class="block text-[10px] text-slate-500 mb-1 font-bold">Last Modified Text</label>
+              <label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('lastModifiedText') }}</label>
               <div class="flex gap-1">
                 <input v-model="data.personal.lastModifiedText" :disabled="!data.personal.showLastModified"
                   class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
                 <button
-                  @click="data.personal.lastModifiedText = `Last modified: ${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`"
-                  :disabled="!data.personal.showLastModified" title="Sync to Today's Date"
+                  @click="data.personal.lastModifiedText = `${t('lastModified')} ${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`"
+                  :disabled="!data.personal.showLastModified" :title="t('syncToToday')"
                   class="px-2 border border-slate-200 rounded bg-white text-slate-500 disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed hover:bg-slate-50 hover:text-[#01a3a4] hover:border-[#01a3a4]/30 transition-colors">
                   <i class="fa-solid fa-clock-rotate-left"></i>
                 </button>
               </div>
             </div>
-            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">Show Last Modified</label>
+            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showLastModified') }}</label>
               <div class="h-[34px] flex items-center">
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" v-model="data.personal.showLastModified" class="sr-only peer">
@@ -281,7 +283,7 @@ const handlePhotoUpload = (event: Event) => {
                     class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01a3a4]">
                   </div>
                   <span class="ml-2 text-xs text-slate-600 font-medium whitespace-nowrap">{{
-                    data.personal.showLastModified ? 'Enabled' : 'Disabled' }}</span>
+                    data.personal.showLastModified ? t('enabled') : t('disabled') }}</span>
                 </label>
               </div>
             </div>
@@ -294,7 +296,7 @@ const handlePhotoUpload = (event: Event) => {
 
     <!-- EDUCATION TAB -->
     <template v-if="activeTab === 'education'">
-      <EditorSection title="Education" :data="data.education" @update="data.education = $event"
+      <EditorSection :title="t('education')" :data="data.education" @update="data.education = $event"
         v-model:settings="data.sectionSettings.education">
         <div class="space-y-4">
           <div v-for="(ed, idx) in data.education" :key="idx"
@@ -303,36 +305,36 @@ const handlePhotoUpload = (event: Event) => {
               @click="data.education.splice(idx, 1)"><i class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2">
               <div class="col-span-2"><label
-                  class="block text-[10px] text-slate-500 font-bold mb-1">Institution</label><input
-                  v-model="ed.institution"
+                  class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('institutionName') }}</label><input
+                  v-model="ed.institution" :placeholder="t('enterInstitution')"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Degree</label><input
-                  v-model="ed.degree"
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('degree') }}</label><input
+                  v-model="ed.degree" :placeholder="t('enterDegree')"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Location</label><input
-                  v-model="ed.location"
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
+                  v-model="ed.location" :placeholder="t('enterLocation')"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Start Date</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('startDate') }}</label><input
                   v-model="ed.startDate"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">End Date</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('endDate') }}</label><input
                   v-model="ed.endDate"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
             </div>
           </div>
           <button
-            @click="data.education.push({ id: generateId(), institution: 'New Institution', degree: '', location: '', startDate: '', endDate: '' })"
+            @click="data.education.push({ id: generateId(), institution: t('newInstitution'), degree: '', location: '', startDate: '', endDate: '' })"
             class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> Add Education</button>
+              class="fa-solid fa-plus mr-1"></i>{{ t('addEducation') }}</button>
         </div>
       </EditorSection>
 
-      <EditorSection title="Skills" :data="data.skills" @update="data.skills = $event"
+      <EditorSection :title="t('skills')" :data="data.skills" @update="data.skills = $event"
         v-model:settings="data.sectionSettings.skills">
         <div class="space-y-4">
           <div v-for="(skill, idx) in data.skills" :key="idx"
@@ -341,27 +343,27 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-3 pr-6">
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Category</label><input
-                  v-model="skill.category"
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('category') }}</label><input
+                  v-model="skill.category" :placeholder="t('enterCategory')"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Icon Class (Optional)</label>
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('iconClassOptional') }}</label>
                 <IconPicker v-model="skill.icon" />
               </div>
             </div>
             <div>
-              <label class="block text-[10px] text-slate-500 font-bold mb-1">Items <span
-                  class="font-normal">(comma-separated)</span></label>
+              <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('items') }} <span
+                  class="font-normal">{{ t('commaSeparated') }}</span></label>
               <textarea :value="skill.items.join(', ')"
                 @change="(e) => skill.items = (e.target as HTMLTextAreaElement).value.split(',').map(s => s.trim()).filter(s => s)"
                 class="w-full text-xs border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] bg-white resize-y"
-                rows="2"></textarea>
+                rows="2" :placeholder="t('enterSkill')"></textarea>
             </div>
           </div>
           <button
-            @click="data.skills.push({ id: generateId(), category: 'New Category', icon: 'fa-solid fa-star', items: [] })"
+            @click="data.skills.push({ id: generateId(), category: t('newCategory'), icon: 'fa-solid fa-star', items: [] })"
             class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> Add Skill Category</button>
+              class="fa-solid fa-plus mr-1"></i>{{ t('addSkill') }}</button>
         </div>
       </EditorSection>
     </template>
@@ -369,18 +371,17 @@ const handlePhotoUpload = (event: Event) => {
     <!-- ARTICLES TAB -->
     <template v-if="activeTab === 'articles'">
       <div class="mb-4 bg-white border border-[#01a3a4]/20 rounded-lg p-3">
-        <label class="block text-xs font-bold text-[#01a3a4] mb-2"><i class="fa-solid fa-file-import mr-1"></i> Import
-          BibTeX</label>
+        <label class="block text-xs font-bold text-[#01a3a4] mb-2"><i class="fa-solid fa-file-import mr-1"></i> {{ t('importBibtex') }}</label>
         <textarea v-model="bibtexInput"
           class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors resize-y h-24 custom-scrollbar mb-2"
-          placeholder="Paste your BibTeX citations here..."></textarea>
+          :placeholder="t('bibtexPlaceholder')"></textarea>
         <button @click="handleBibtexImport"
           class="px-3 py-1.5 text-xs font-semibold text-white rounded bg-[#01a3a4] hover:bg-[#01a3a4]/90 transition-colors shadow-sm">
-          Parse & Append
+          {{ t('parseBibtex') }}
         </button>
       </div>
 
-      <EditorSection title="Publications" :data="data.articles" @update="data.articles = $event"
+      <EditorSection :title="t('publications')" :data="data.articles" @update="data.articles = $event"
         v-model:settings="data.sectionSettings.articles">
         <div class="space-y-4">
           <div v-for="(ar, idx) in data.articles" :key="ar.id || idx"
@@ -392,7 +393,7 @@ const handlePhotoUpload = (event: Event) => {
                 @click="ar._collapsed = !ar._collapsed">
                 <i class="fa-solid fa-chevron-right mr-1 transition-transform inline-block"
                   :class="{ 'rotate-90': !ar._collapsed }"></i>
-                {{ ar.title || 'Untitled Publication' }}
+                {{ ar.title || t('untitledPublication') }}
               </div>
               <div class="flex items-center gap-1 shrink-0 ml-2">
                 <button @click.stop="moveItem(data.articles, idx, -1)" :disabled="idx === 0"
@@ -411,39 +412,37 @@ const handlePhotoUpload = (event: Event) => {
             <div v-show="!ar._collapsed" class="mt-3 pt-3 border-t border-[#01a3a4]/20">
               <div class="grid grid-cols-12 gap-3 mb-3">
                 <div class="col-span-12"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">Title</label><input v-model="ar.title"
+                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('title') }}</label><input v-model="ar.title"
                     class="w-full font-semibold text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">Journal
-                    Name</label><input v-model="ar.journal"
+                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('journalName') }}</label><input v-model="ar.journal"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">DOI</label><input
+                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('doi') }}</label><input
                     v-model="ar.doi"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">Year</label><input v-model="ar.year"
+                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('year') }}</label><input v-model="ar.year"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">Vol(Issue)</label><input
+                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('volumeIssue') }}</label><input
                     v-model="ar.volumeAndIssue"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">Pages</label><input v-model="ar.pages"
+                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('pages') }}</label><input v-model="ar.pages"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">Impact
-                    Factor</label><input type="number" step="0.1" v-model="ar.impactFactor"
+                <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('impactFactor') }}</label><input type="number" step="0.1" v-model="ar.impactFactor"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]"
-                    placeholder="(0=Chapter)"></div>
+                    :placeholder="t('impactFactorNote')"></div>
               </div>
 
               <div class="mt-3 border-t border-[#01a3a4]/10 pt-3">
                 <label class="flex justify-between items-end text-[10px] text-[#01a3a4] font-bold mb-2">
-                  <span>Authors (Click to toggle properties)</span>
+                  <span>{{ t('authorsClickToggle') }}</span>
                 </label>
                 <div class="flex flex-wrap gap-2">
                   <div v-for="(au, i) in ar.authors" :key="i"
@@ -451,24 +450,24 @@ const handlePhotoUpload = (event: Event) => {
                     <div class="flex items-center">
                       <input v-model="au.name" class="px-1.5 py-1 text-center font-semibold text-xs outline-none w-24">
                       <button @click="ar.authors.splice(i, 1)" class="px-1 text-slate-300 hover:text-red-500"
-                        title="Remove author"><i class="fa-solid fa-xmark"></i></button>
+                        :title="t('removeAuthor')"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                     <div class="flex flex-row text-[9px] divide-x divide-slate-100 border-t border-slate-100">
                       <button @click="au.isMe = !au.isMe"
                         :class="au.isMe ? 'bg-[#01a3a4] text-white' : 'text-slate-500 hover:bg-slate-50'"
-                        class="flex-1 py-1 px-1 text-center transition-colors" title="Toggle 'Me' (Bold)">Me</button>
+                        class="flex-1 py-1 px-1 text-center transition-colors" :title="t('toggleMe')">{{ t('me') }}</button>
                       <button @click="au.isFirst = !au.isFirst"
                         :class="au.isFirst ? 'bg-orange-500 text-white' : 'text-slate-500 hover:bg-slate-50'"
                         class="flex-1 py-1 px-1 text-center transition-colors"
-                        title="Toggle First Author (#)">#</button>
+                        :title="t('toggleFirst')">{{ t('firstAuthor') }}</button>
                       <button @click="au.isCorresponding = !au.isCorresponding"
                         :class="au.isCorresponding ? 'bg-blue-500 text-white' : 'text-slate-500 hover:bg-slate-50'"
                         class="flex-1 py-1 px-1 text-center transition-colors"
-                        title="Toggle Corresponding (*)">*</button>
+                        :title="t('toggleCorresponding')">{{ t('corresponding') }}</button>
                     </div>
                   </div>
                   <button
-                    @click="ar.authors.push({ name: 'New Author', isMe: false, isFirst: false, isCorresponding: false })"
+                    @click="ar.authors.push({ name: t('newAuthor'), isMe: false, isFirst: false, isCorresponding: false })"
                     class="text-[10px] px-2 py-1 bg-slate-100 text-slate-500 hover:bg-slate-200 border border-slate-200 rounded shadow-sm flex items-center justify-center h-full min-h-[44px]">
                     <i class="fa-solid fa-plus"></i>
                   </button>
@@ -477,13 +476,13 @@ const handlePhotoUpload = (event: Event) => {
             </div>
           </div>
           <button
-            @click="data.articles.push({ id: generateId(), title: 'New Publication', authors: [{ name: 'Me', isMe: true, isFirst: true, isCorresponding: false }], journal: '', year: '', doi: '' })"
+            @click="data.articles.push({ id: generateId(), title: t('newPublication'), authors: [{ name: t('me'), isMe: true, isFirst: true, isCorresponding: false }], journal: '', year: '', doi: '' })"
             class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> Add Publication</button>
+              class="fa-solid fa-plus mr-1"></i> {{ t('addPublication') }}</button>
         </div>
       </EditorSection>
 
-      <EditorSection title="Conference Proceedings" :data="data.conferences" @update="data.conferences = $event"
+      <EditorSection :title="t('conferenceProceedings')" :data="data.conferences" @update="data.conferences = $event"
         v-model:settings="data.sectionSettings.conferences">
         <div class="space-y-4">
           <div v-for="(cf, idx) in data.conferences" :key="idx"
@@ -492,35 +491,34 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Conference
-                  Name</label><input v-model="cf.name"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('conferenceName') }}</label><input v-model="cf.name"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Date</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
                   v-model="cf.dateStr"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Location</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
                   v-model="cf.location"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Type (e.g., Poster
-                  presentation)</label><input v-model="cf.type"
-                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('type') }}</label><input v-model="cf.type"
+                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white"
+                  :placeholder="t('conferenceTypeHint')">
               </div>
             </div>
           </div>
           <button
-            @click="data.conferences.push({ id: generateId(), name: 'New Conference', dateStr: '', location: '', type: '' })"
+            @click="data.conferences.push({ id: generateId(), name: t('newConference'), dateStr: '', location: '', type: '' })"
             class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> Add Conference</button>
+              class="fa-solid fa-plus mr-1"></i> {{ t('addConference') }}</button>
         </div>
       </EditorSection>
     </template>
 
     <!-- EMPLOYMENT TAB -->
     <template v-if="activeTab === 'employment'">
-      <EditorSection title="Employment History" :data="data.employment" @update="data.employment = $event"
+      <EditorSection :title="t('employmentHistory')" :data="data.employment" @update="data.employment = $event"
         v-model:settings="data.sectionSettings.employment">
         <div class="space-y-4">
           <div v-for="(em, idx) in data.employment" :key="idx"
@@ -530,41 +528,44 @@ const handlePhotoUpload = (event: Event) => {
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
               <div class="col-span-2"><label
-                  class="block text-[10px] text-slate-500 font-bold mb-1">Role/Title</label><input v-model="em.role"
+                  class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('roleTitle') }}</label><input v-model="em.role"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="col-span-2"><label
-                  class="block text-[10px] text-slate-500 font-bold mb-1">Institution/Company</label><input
+                  class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('institutionCompany') }}</label><input
                   v-model="em.institution"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Location</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
                   v-model="em.location"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="flex gap-2">
-                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Start
-                    Date</label><input v-model="em.startDate"
+                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('startDate') }}</label><input v-model="em.startDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
-                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">End Date</label><input
+                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('endDate') }}</label><input
                     v-model="em.endDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
               </div>
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('descriptionOptional') }}</label><textarea v-model="em.description" rows="2"
+                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white resize-y"
+                  :placeholder="t('enterDescription')"></textarea>
+              </div>
             </div>
           </div>
           <button
-            @click="data.employment.push({ id: generateId(), role: 'New Role', institution: '', location: '', startDate: '', endDate: '' })"
+            @click="data.employment.push({ id: generateId(), role: t('newRole'), institution: '', location: '', startDate: '', endDate: '', description: '' })"
             class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> Add Employment</button>
+              class="fa-solid fa-plus mr-1"></i> {{ t('addEmployment') }}</button>
         </div>
       </EditorSection>
     </template>
 
     <!-- OTHER META DATA TAB (Awards, Fundings, Academic Contributions) -->
     <template v-if="activeTab === 'other'">
-      <EditorSection title="Awards & Honors" :data="data.awards" @update="data.awards = $event"
+      <EditorSection :title="t('awardsHonors')" :data="data.awards" @update="data.awards = $event"
         v-model:settings="data.sectionSettings.awards">
         <div class="space-y-4">
           <div v-for="(aw, idx) in data.awards" :key="idx"
@@ -573,20 +574,19 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Award
-                  Title</label><input v-model="aw.title"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('awardTitle') }}</label><input v-model="aw.title"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Issuer / Organizer</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('issuerOrganizer') }}</label><input
                   v-model="aw.issuer"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Date</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
                   v-model="aw.dateStr"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="col-span-2">
-                <label class="block text-[10px] text-slate-500 font-bold mb-1">Description</label>
+                <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('description') }}</label>
                 <textarea v-model="aw.description"
                   class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
                   rows="2"></textarea>
@@ -595,13 +595,13 @@ const handlePhotoUpload = (event: Event) => {
             <!-- Sub-editor for award links could go here -->
           </div>
           <button
-            @click="data.awards.push({ id: generateId(), title: 'New Award', issuer: '', dateStr: '', description: '', links: [] })"
+            @click="data.awards.push({ id: generateId(), title: t('newAward'), issuer: '', dateStr: '', description: '', links: [] })"
             class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> Add Award</button>
+              class="fa-solid fa-plus mr-1"></i> {{ t('addAward') }}</button>
         </div>
       </EditorSection>
 
-      <EditorSection title="Research Fundings (Academic Block)" :data="data.fundings" @update="data.fundings = $event"
+      <EditorSection :title="t('researchFundings')" :data="data.fundings" @update="data.fundings = $event"
         v-model:settings="data.sectionSettings.academic">
         <div class="space-y-4">
           <div v-for="(fd, idx) in data.fundings" :key="idx"
@@ -610,53 +610,49 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Project
-                  Title</label><input v-model="fd.title"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('projectTitle') }}</label><input v-model="fd.title"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Funding
-                  Source</label><input v-model="fd.source"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('fundingSource') }}</label><input v-model="fd.source"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Grant Number</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('grantNo') }}</label><input
                   v-model="fd.grantNo"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Duration/Period</label><input
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('period') }}</label><input
                   v-model="fd.period"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Your
-                  Role</label><input v-model="fd.role"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('yourRole') }}</label><input v-model="fd.role"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
             </div>
           </div>
           <button
-            @click="data.fundings.push({ id: generateId(), source: '', grantNo: '', title: 'New Funding', period: '', role: '' })"
+            @click="data.fundings.push({ id: generateId(), source: '', grantNo: '', title: t('newFunding'), period: '', role: '' })"
             class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> Add Funding</button>
+              class="fa-solid fa-plus mr-1"></i> {{ t('addFunding') }}</button>
         </div>
       </EditorSection>
 
-      <EditorSection title="Extra Academic Items"
+      <EditorSection :title="t('academicContributions')"
         :data="{ societyServices: data.societyServices, reviews: data.reviews, contributions: data.contributions }"
         @update="data.societyServices = $event.societyServices; data.reviews = $event.reviews; data.contributions = $event.contributions">
         <div class="text-xs text-slate-600 mb-4 bg-slate-100 p-3 rounded shadow-inner">
           <i class="fa-solid fa-circle-info text-[#01a3a4] mr-1"></i>
-          These are simple lists of strings. To edit them easily (add, remove, change order), please switch to the
-          <strong>JSON tab</strong> above.
+          {{ t('simpleListHint') }}
         </div>
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">Society Services
+          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('societyServices') }}
             <span class="font-normal text-slate-400">({{ data.societyServices.length }} items)</span></label>
         </div>
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">Reviews <span
+          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('reviews') }} <span
               class="font-normal text-slate-400">({{ data.reviews.length }} items)</span></label>
         </div>
         <div class="mb-2">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">Contributions
+          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('contributions') }}
             <span class="font-normal text-slate-400">({{ data.contributions.length }} items)</span></label>
         </div>
       </EditorSection>
@@ -665,8 +661,7 @@ const handlePhotoUpload = (event: Event) => {
     <!-- CUSTOM SECTIONS TAB -->
     <template v-if="activeTab === 'custom'">
       <div class="mb-4 text-xs text-slate-500 bg-slate-100 p-3 rounded shadow-sm border border-slate-200">
-        <i class="fa-solid fa-shapes mr-1 text-[#01a3a4]"></i> Custom sections allow you to create completely new resume
-        blocks (e.g., 'Projects', 'Volunteering', 'Certificates') with custom titles and generic content structures.
+        <i class="fa-solid fa-shapes mr-1 text-[#01a3a4]"></i> {{ t('customSectionDescription') }}
       </div>
       <div class="space-y-6">
         <div v-for="(sec, sIdx) in data.customSections" :key="sec.id"
@@ -675,15 +670,14 @@ const handlePhotoUpload = (event: Event) => {
           <div
             class="px-3 py-2 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
             <div class="flex items-center gap-2 flex-1">
-              <input type="checkbox" v-model="sec.visible" title="Toggle section visibility"
+              <input type="checkbox" v-model="sec.visible" :title="t('toggleVisibility')"
                 class="accent-[#01a3a4] cursor-pointer w-3.5 h-3.5 rounded shrink-0">
               <input v-model="sec.title"
                 class="text-[11px] font-bold text-slate-700 uppercase tracking-wider bg-transparent border-b border-dashed border-slate-300 hover:border-slate-400 focus:border-[#01a3a4] outline-none px-1 py-0.5 w-full max-w-[200px]"
-                placeholder="Custom Section Title">
+                :placeholder="t('customSectionTitle')">
             </div>
             <button @click="removeCustomSection(sIdx)"
-              class="text-[10px] text-red-500 hover:text-red-600 transition shrink-0 font-medium">Remove
-              Section</button>
+              class="text-[10px] text-red-500 hover:text-red-600 transition shrink-0 font-medium">{{ t('removeSection') }}</button>
           </div>
 
           <div class="p-4 bg-white" :class="{ 'opacity-50 grayscale transition-all duration-300': !sec.visible }">
@@ -694,32 +688,31 @@ const handlePhotoUpload = (event: Event) => {
                   class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                     class="fa-solid fa-trash text-xs"></i></button>
                 <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-                  <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">Item
-                      Title</label><input v-model="item.title" placeholder="e.g. Project Name"
+                  <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('itemTitle') }}</label><input v-model="item.title" :placeholder="t('projectName')"
                       class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                   </div>
-                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Subtitle</label><input
+                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('subtitle') }}</label><input
                       v-model="item.subtitle"
                       class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                   </div>
-                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Date</label><input
+                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
                       v-model="item.dateStr"
                       class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                   </div>
-                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">Location</label><input
+                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
                       v-model="item.location"
                       class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                   </div>
                   <div class="col-span-2">
-                    <label class="block text-[10px] text-slate-500 font-bold mb-1">Description</label>
+                    <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('description') }}</label>
                     <textarea v-model="item.description"
                       class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
                       rows="2"></textarea>
                   </div>
                 </div>
                 <div class="mt-2 border-t border-slate-200 pt-2">
-                  <label class="block text-[10px] text-slate-500 font-bold mb-1">Bullet Points <span
-                      class="font-normal">(One per line)</span></label>
+                  <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('bulletPoints') }} <span
+                      class="font-normal">{{ t('bulletPointsHint') }}</span></label>
                   <textarea :value="item.bullets?.join('\n')"
                     @change="(e) => item.bullets = (e.target as HTMLTextAreaElement).value.split('\n').map(s => s.trim()).filter(s => s)"
                     class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
@@ -728,25 +721,24 @@ const handlePhotoUpload = (event: Event) => {
               </div>
               <!-- Add Custom Item Button -->
               <button
-                @click="sec.items.push({ id: generateId(), title: 'New Item', subtitle: '', dateStr: '', location: '', description: '', bullets: [] })"
+                @click="sec.items.push({ id: generateId(), title: t('newItem'), subtitle: '', dateStr: '', location: '', description: '', bullets: [] })"
                 class="w-full py-2.5 border border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-                  class="fa-solid fa-plus mr-1"></i> Add Item into {{ sec.title || 'this section' }}</button>
+                  class="fa-solid fa-plus mr-1"></i> {{ t('addItem') }} {{ sec.title || '' }}</button>
             </div>
           </div>
         </div>
 
         <button @click="addCustomSection"
           class="w-full py-3 bg-[#e6f6f6] border border-[#01a3a4]/20 rounded-lg text-[#01a3a4] text-sm font-semibold hover:bg-[#d0efef] transition-colors shadow-sm"><i
-            class="fa-solid fa-folder-plus mr-1"></i> Create New Custom Section</button>
+            class="fa-solid fa-folder-plus mr-1"></i> {{ t('addCustomSection') }}</button>
       </div>
     </template>
 
     <!-- SETTINGS / RAW TEMPLATE TAB -->
     <template v-if="activeTab === 'settings'">
       <div class="mb-4 border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm p-4">
-        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Global
-          Settings</h3>
-        <label class="block text-xs font-bold text-slate-500 mb-2">Accent / Theme Color</label>
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">{{ t('globalSettings') }}</h3>
+        <label class="block text-xs font-bold text-slate-500 mb-2">{{ t('themeColor') }}</label>
         <div class="flex items-center gap-3">
           <input type="color" v-model="data.themeColor"
             class="w-10 h-10 rounded border border-slate-200 p-0 cursor-pointer shadow-inner">
@@ -754,7 +746,7 @@ const handlePhotoUpload = (event: Event) => {
             class="text-sm font-mono border border-slate-200 rounded p-1.5 outline-none w-28 focus:border-[#01a3a4]">
         </div>
 
-        <label class="block text-xs font-bold text-slate-500 mb-2 mt-4">Font Scale</label>
+        <label class="block text-xs font-bold text-slate-500 mb-2 mt-4">{{ t('fontScale') }}</label>
         <div class="flex items-center gap-2">
           <select v-model.number="data.fontScale"
             class="text-xs border border-slate-200 rounded p-1.5 focus:border-[#01a3a4] outline-none bg-white">
@@ -777,14 +769,13 @@ const handlePhotoUpload = (event: Event) => {
             class="w-16 text-sm font-mono border border-slate-200 rounded p-1 text-center focus:border-[#01a3a4] outline-none">
           <span class="text-sm font-mono text-slate-600 w-8">%</span>
         </div>
-        <p class="text-[10px] text-slate-400 mt-1">Adjust to fit more content on pages (70%-120%)</p>
+        <p class="text-[10px] text-slate-400 mt-1">{{ t('fontScaleHint') }}</p>
       </div>
 
       <div class="mb-6 border border-slate-200 rounded-lg bg-white shadow-sm p-4" v-if="data.sectionOrder">
         <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
-          Section Display Order</h3>
-        <p class="text-[10px] text-slate-500 mb-3">Reorder standard and custom sections within the document. The final
-          PDF will respect this sequence.</p>
+          {{ t('sectionDisplayOrder') }}</h3>
+        <p class="text-[10px] text-slate-500 mb-3">{{ t('reorderSectionsInfo') }}</p>
         <div class="space-y-2">
           <div v-for="(secId, index) in data.sectionOrder" :key="secId"
             class="flex justify-between items-center px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 font-medium">
@@ -804,13 +795,11 @@ const handlePhotoUpload = (event: Event) => {
         </div>
       </div>
 
-      <EditorSection title="Data Source Inspection" :data="data" @update="emit('update:modelValue', $event)">
+      <EditorSection :title="t('dataSourceInspection')" :data="data" @update="emit('update:modelValue', $event)">
         <div
           class="p-4 bg-orange-50 text-orange-800 text-xs rounded border border-orange-200 leading-relaxed shadow-inner">
-          <p class="font-bold mb-1 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Advanced Use Only</p>
-          <p>Please switch to the <strong>JSON tab</strong> above to manually inspect or overwrite the ENTIRE state of
-            the application. To safely backup your CV or restore an old one, please use the <strong>Import JSON</strong>
-            and <strong>Export JSON</strong> buttons at the top of the editor.</p>
+          <p class="font-bold mb-1 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> {{ t('advancedUseOnly') }}</p>
+          <p>{{ t('jsonTabHint') }}</p>
         </div>
       </EditorSection>
     </template>

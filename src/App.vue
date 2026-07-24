@@ -4,9 +4,57 @@ import CvPreview from './components/CvPreview.vue';
 import CvEditor from './components/CvEditor.vue';
 import { defaultData } from './defaultData';
 import type { CvData } from './types';
+import { useLocale } from './composables/useLocale';
 
 const cvData = ref<CvData>(defaultData);
 const activeTab = ref('personal');
+const lastSaved = ref<Date | null>(null);
+const showSaveToast = ref(false);
+const { t, locale, toggleLocale, initLocale } = useLocale();
+
+// Initialize locale on mount
+onMounted(() => {
+  initLocale();
+  // Try to load saved data
+  const saved = localStorage.getItem('cv-generator-data');
+  if (saved) {
+    try {
+      cvData.value = JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to load saved data');
+    }
+  }
+  startAutoSave();
+});
+
+onUnmounted(() => {
+  if (autoSaveInterval) clearInterval(autoSaveInterval);
+});
+
+let autoSaveInterval: number | null = null;
+
+// Start auto-save
+const startAutoSave = () => {
+  if (autoSaveInterval) clearInterval(autoSaveInterval);
+  autoSaveInterval = window.setInterval(() => {
+    handleSave();
+  }, 60000);
+};
+
+// Save to localStorage
+const handleSave = () => {
+  if (cvData.value.personal) {
+    const now = new Date();
+    const formattedDate = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+    cvData.value.personal.lastModifiedText = `Last modified: ${formattedDate}`;
+  }
+  localStorage.setItem('cv-generator-data', JSON.stringify(cvData.value));
+  lastSaved.value = new Date();
+  showSaveToast.value = true;
+  setTimeout(() => {
+    showSaveToast.value = false;
+  }, 2000);
+};
 
 const handleIconClick = (tabId: string) => {
   activeTab.value = tabId;
@@ -23,8 +71,6 @@ const handleIconClick = (tabId: string) => {
 
 const handlePrint = () => {
   try {
-    // Determine the exact dimensions to lock the scale and avoid bleeding
-    // Setting body zoom to 1 or forcing container to not be constrained
     document.body.classList.add('is-printing');
     window.print();
     document.body.classList.remove('is-printing');
@@ -79,8 +125,12 @@ const handleImportJson = (event: Event) => {
         <h1 class="text-lg font-semibold tracking-tight text-slate-900">CV <span style="color: #01a3a4">Generator</span>
         </h1>
       </div>
-      <div class="flex items-center gap-3 text-sm text-slate-500 font-medium">
-        Personal CV Generator
+      <div class="flex items-center gap-3">
+        <button @click="toggleLocale"
+          class="px-4 py-2 text-sm font-bold rounded-lg bg-slate-800 hover:bg-slate-900 text-white transition-colors shadow-md flex items-center gap-2">
+          <i class="fa-solid fa-globe"></i>
+          <span>{{ locale === 'en' ? '中文' : 'EN' }}</span>
+        </button>
       </div>
     </header>
 
@@ -148,6 +198,10 @@ const handleImportJson = (event: Event) => {
               class="px-2 py-1.5 text-[11px] font-semibold text-white rounded bg-[#01a3a4] hover:bg-[#01a3a4]/90 transition-colors shadow-sm whitespace-nowrap border border-[#01a3a4]">
               <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden sm:inline">PDF</span>
             </button>
+            <button @click="handleSave"
+              class="px-2 py-1.5 text-[11px] font-semibold text-white rounded bg-green-600 hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap border border-green-600">
+              <i class="fa-solid fa-save mr-1"></i> <span class="hidden sm:inline">Save</span>
+            </button>
           </div>
         </div>
         <div class="flex-1 min-h-0 overflow-y-auto bg-slate-50 custom-scrollbar">
@@ -162,18 +216,27 @@ const handleImportJson = (event: Event) => {
           <CvPreview :data="cvData" class="shadow-2xl print:shadow-none bg-white w-full print:w-full" />
         </div>
       </section>
+
+      <!-- Save Toast -->
+      <Transition name="toast">
+        <div v-if="showSaveToast"
+          class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50">
+          <i class="fa-solid fa-check-circle"></i>
+          <span class="text-sm font-medium">{{ t('savedSuccessfully') }}</span>
+        </div>
+      </Transition>
     </main>
 
     <!-- Status Bar -->
     <footer
       class="px-4 py-1.5 bg-white border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-500 no-print shrink-0">
       <div class="flex items-center gap-4">
-        <span>Mode: <span class="font-medium italic" style="color: #01a3a4">Visual Design</span></span>
-        <span>Auto-save: <span class="font-medium" style="color: #01a3a4">Active</span></span>
+        <span>Mode: <span class="font-medium italic" style="color: #01a3a4">{{ t('visualDesign') }}</span></span>
+        <span>{{ t('autoSave') }}: <span class="font-medium" style="color: #01a3a4">{{ t('active') }}</span></span>
       </div>
       <div class="flex gap-4">
-        <span>FontAwesome: Loaded</span>
-        <span>Vue v3</span>
+        <span>{{ t('fontAwesomeLoaded') }}</span>
+        <span>{{ t('vueLoaded') }}</span>
       </div>
     </footer>
   </div>

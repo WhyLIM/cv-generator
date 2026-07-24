@@ -33,6 +33,7 @@ export interface Employment {
   location: string;
   startDate: string;
   endDate: string;
+  description?: string; // Optional work description
 }
 
 export interface Skill {
