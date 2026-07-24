@@ -110,9 +110,12 @@ const getSectionTitle = (secId: string) => {
 const addCustomSection = () => {
   const newId = generateId();
   if (!data.value.customSections) data.value.customSections = [];
-  data.value.customSections.push({ id: newId, title: 'MY CUSTOM SECTION', visible: true, items: [] });
+  const newSection = { id: newId, title: 'MY CUSTOM SECTION', visible: true, items: [] };
+  data.value.customSections.push(newSection);
   if (!data.value.sectionOrder) data.value.sectionOrder = [];
-  data.value.sectionOrder.push(`custom-${newId}`);
+  if (!data.value.sectionOrder.includes(`custom-${newId}`)) {
+    data.value.sectionOrder.push(`custom-${newId}`);
+  }
 };
 
 const removeCustomSection = (index: number) => {
