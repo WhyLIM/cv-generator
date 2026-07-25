@@ -36,6 +36,7 @@ const data = computed({
       if (!val.customSections) val.customSections = [];
       modified = true;
     }
+    
     // Auto-migrate section order
     if (!val.sectionOrder) {
       val.sectionOrder = ['education', 'employment', 'skills', 'articles', 'conferences', 'academic', 'awards'];
@@ -44,6 +45,9 @@ const data = computed({
       }
       modified = true;
     } else {
+      // Deduplicate sectionOrder first
+      val.sectionOrder = [...new Set(val.sectionOrder)];
+      
       // Ensure existing custom customSections are in sectionOrder
       if (val.customSections) {
         val.customSections.forEach(cs => {
@@ -52,6 +56,17 @@ const data = computed({
             modified = true;
           }
         });
+      }
+      
+      // Remove sectionOrder entries that don't exist in data
+      const validSections = ['education', 'employment', 'skills', 'articles', 'conferences', 'academic', 'awards'];
+      const customSectionIds = val.customSections ? val.customSections.map(cs => 'custom-' + cs.id) : [];
+      const validOrder = val.sectionOrder.filter((id: string) => validSections.includes(id) || customSectionIds.includes(id));
+      
+      // Only update if there were duplicates or invalid entries
+      if (val.sectionOrder.length !== validOrder.length) {
+        val.sectionOrder = validOrder;
+        modified = true;
       }
     }
 
