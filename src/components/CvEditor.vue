@@ -136,6 +136,14 @@ const moveSection = (secId: string, direction: number) => {
   [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
 };
 
+// Move item inside a list (used by collapsible items: articles, custom items)
+const moveItem = (list: any[], idx: number, direction: number) => {
+  if (!list) return;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= list.length) return;
+  [list[idx], list[newIdx]] = [list[newIdx], list[idx]];
+};
+
 // Get section title with fallback
 const getSectionTitle = (secId: string): string => {
   if (secId.startsWith('custom-')) {
@@ -731,39 +739,61 @@ const handlePhotoUpload = (event: Event) => {
             <div class="space-y-4">
               <div v-for="(item, iIdx) in sec.items" :key="item.id"
                 class="p-3 border border-slate-200 bg-slate-50/50 rounded relative group">
-                <button @click="sec.items.splice(iIdx, 1)"
-                  class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
-                    class="fa-solid fa-trash text-xs"></i></button>
-                <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-                  <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('itemTitle') }}</label><input v-model="item.title" :placeholder="t('projectName')"
-                      class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+
+                <!-- Collapsible header -->
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex-1 font-bold text-xs text-slate-700 cursor-pointer flex items-center min-w-0"
+                    @click="item._collapsed = !item._collapsed">
+                    <i class="fa-solid fa-chevron-right mr-1 transition-transform inline-block shrink-0"
+                      :class="{ 'rotate-90': !item._collapsed }"></i>
+                    <span class="truncate">{{ item.title || t('untitledItem') }}</span>
                   </div>
-                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('subtitle') }}</label><input
-                      v-model="item.subtitle"
-                      class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-                  </div>
-                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
-                      v-model="item.dateStr"
-                      class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-                  </div>
-                  <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
-                      v-model="item.location"
-                      class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-                  </div>
-                  <div class="col-span-2">
-                    <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('description') }}</label>
-                    <textarea v-model="item.description"
-                      class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
-                      rows="2"></textarea>
+                  <div class="flex items-center gap-1 shrink-0">
+                    <button @click.stop="moveItem(sec.items, iIdx, -1)" :disabled="iIdx === 0"
+                      class="w-6 h-6 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 disabled:opacity-30 disabled:hover:bg-white shadow-sm flex items-center justify-center"><i
+                        class="fa-solid fa-arrow-up text-[10px]"></i></button>
+                    <button @click.stop="moveItem(sec.items, iIdx, 1)" :disabled="iIdx === sec.items.length - 1"
+                      class="w-6 h-6 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 disabled:opacity-30 disabled:hover:bg-white shadow-sm flex items-center justify-center"><i
+                        class="fa-solid fa-arrow-down text-[10px]"></i></button>
+                    <button @click.stop="sec.items.splice(iIdx, 1)"
+                      class="w-6 h-6 rounded bg-white hover:bg-red-50 border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 shadow-sm ml-1 flex items-center justify-center"><i
+                        class="fa-solid fa-trash text-[10px]"></i></button>
                   </div>
                 </div>
-                <div class="mt-2 border-t border-slate-200 pt-2">
-                  <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('bulletPoints') }} <span
-                      class="font-normal">{{ t('bulletPointsHint') }}</span></label>
-                  <textarea :value="item.bullets?.join('\n')"
-                    @change="(e) => item.bullets = (e.target as HTMLTextAreaElement).value.split('\n').map(s => s.trim()).filter(s => s)"
-                    class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
-                    rows="3"></textarea>
+
+                <!-- Collapsible body -->
+                <div v-show="!item._collapsed" class="mt-3 pt-3 border-t border-slate-200">
+                  <div class="grid grid-cols-2 gap-3 mb-2">
+                    <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('itemTitle') }}</label><input v-model="item.title" :placeholder="t('projectName')"
+                        class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                    </div>
+                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('subtitle') }}</label><input
+                        v-model="item.subtitle"
+                        class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                    </div>
+                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
+                        v-model="item.dateStr"
+                        class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                    </div>
+                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
+                        v-model="item.location"
+                        class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                    </div>
+                    <div class="col-span-2">
+                      <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('description') }}</label>
+                      <textarea v-model="item.description"
+                        class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
+                        rows="2"></textarea>
+                    </div>
+                  </div>
+                  <div class="mt-2 border-t border-slate-200 pt-2">
+                    <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('bulletPoints') }} <span
+                        class="font-normal">{{ t('bulletPointsHint') }}</span></label>
+                    <textarea :value="item.bullets?.join('\n')"
+                      @change="(e) => item.bullets = (e.target as HTMLTextAreaElement).value.split('\n').map(s => s.trim()).filter(s => s)"
+                      class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
+                      rows="3"></textarea>
+                  </div>
                 </div>
               </div>
               <!-- Add Custom Item Button -->
