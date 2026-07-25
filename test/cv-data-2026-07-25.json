@@ -1,0 +1,333 @@
+{
+  "themeColor": "#01a3a4",
+  "fontScale": 0.99,
+  "personal": {
+    "name": "邓美清",
+    "nameZh": "",
+    "phone": "+86 17759735912",
+    "email": "D1120013615@163.com",
+    "github": "1997.01  已婚已育",
+    "githubUrl": "1997.01  福建三明 已婚已育",
+    "website": "",
+    "websiteUrl": "",
+    "showPhoto": false,
+    "photoUrl": "",
+    "documentTitle": "个人简历",
+    "showDocumentTitle": true,
+    "footerTitle": "个人简历",
+    "showFooterTitle": true,
+    "lastModifiedText": "Last modified: 2026.07.25",
+    "showLastModified": true
+  },
+  "sectionSettings": {
+    "education": {
+      "title": "教育背景",
+      "visible": true
+    },
+    "employment": {
+      "title": "nothing",
+      "visible": false
+    },
+    "skills": {
+      "title": "证书与专利",
+      "visible": true
+    },
+    "articles": {
+      "title": "PEER-REVIEWED ARTICLES",
+      "visible": false
+    },
+    "conferences": {
+      "title": "noehing",
+      "visible": false
+    },
+    "academic": {
+      "title": "ACADEMIC CONTRIBUTIONS",
+      "visible": false
+    },
+    "awards": {
+      "title": "SELECTED AWARDS AND HONORS",
+      "visible": false
+    }
+  },
+  "sectionOrder": [
+    "education",
+    "skills",
+    "custom-su4kivat3",
+    "custom-crj7cqwa1",
+    "custom-4i1757a14",
+    "custom-4r48m8qio",
+    "custom-4r48m8qio",
+    "custom-4i1757a14",
+    "articles",
+    "conferences",
+    "employment",
+    "custom-crj7cqwa1",
+    "academic",
+    "awards",
+    "custom-su4kivat3"
+  ],
+  "customSections": [
+    {
+      "id": "4i1757a14",
+      "title": "项目经验",
+      "visible": true,
+      "items": [
+        {
+          "id": "d9ghvjgwq",
+          "title": "建立研发设计转换真实流程（荧光层析26个项目）",
+          "subtitle": "",
+          "dateStr": "试剂DQA——2023-至今",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "升级设计转换控制程序文件，深入梳理并重构设计开发工作，并推动文件实际落地，减少冗余环节，2025年荧光层析试剂设计转换总工时降低35%",
+            "同时建立线上简道云管理流程【项目管理问题跟踪表】，实时记录设计转换过程问题及解决状态，实现项目进度透明化，定期复盘分类问题种类，方便后续针对性解决，2024年与2023年比较，发现问题数量降低27%"
+          ]
+        },
+        {
+          "id": "a8uqxu1gp",
+          "title": "FLI6000仪器",
+          "subtitle": "",
+          "dateStr": "仪器DQA——2025.10-至今",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "设计输入阶段质量策划：首次以质量角色深入介入仪器研发全流程，协同研发、注册、市场等多部门进行设计输入要求评审。系统梳理前代产品（FLI4000）生命周期内的NC、客诉及售后问题清单，将其转化为设计输入要求，确保历史问题在新产品设计源头得到规避。",
+            "研发过程质量监控：深度参与原理样机评审及各阶段技术评审，从可制造性、可测试性、法规符合性等质量视角提出改进建议；跟踪设计变更，评估变更对产品性能、安全性及注册的影响，确保变更受控。",
+            "注册检前置支持：在尚未完全进入工程样机阶段的情况下，配合注册部提前启动注册检测工作。协调准备注册检所需的技术资料和样品，跟进检测进度，提前识别并推动解决潜在不符合项，降低后续整改风险。"
+          ]
+        },
+        {
+          "id": "3b8osqu2z",
+          "title": "注册项目全流程策划与推进（试剂）",
+          "subtitle": "",
+          "dateStr": "试剂DQA——2025.01-至今",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "起草《注册产品策划管理规程》并推动受控发布，将注册策划全流程固化形成标准化文件；负责首次注册及变更注册项目的全流程推进与跨部门协调（该PM职能原归属DQA，后移交注册部）。",
+            "主导《项目策划总表》完整流转，统筹研发、QC、临床、生技、采购、仓库、工程等十余个部门完成策划任务并审核体系相关部分。",
+            "负责技术要求、说明书、DMR等注册资料的合规性审核及体系资料输出进度跟踪，确保符合IVDR、MDSAP及国内法规要求。",
+            "主导专项内审、体考准备与整改闭环，协调注册检前置的实物、资料及现场准备，跟进检测进度",
+            "负责试剂项目风险管理文件（风险分析报告、风险管理计划等）的编辑与审核，确保风险控制措施在设计开发全生命周期中得到有效识别、评估与闭环。"
+          ]
+        },
+        {
+          "id": "0bua0c3dx",
+          "title": "质量改善专项：制程异常与客户抱怨数据驱动的流程优化",
+          "subtitle": "",
+          "dateStr": "DQA主管——2023-2026",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "日常维护制程异常及客户抱怨数据库，运用统计工具分析TOP问题，识别关键失效模式，推动研发、生产、供应链多部门协同改善。",
+            "针对高频问题，制定并更新检验标准及作业指导书，完善控制计划，使同类异常重复发生率有所下降。",
+            "主导CAPA有效性验证，确保每项纠正预防措施均通过数据证实有效后方关闭，形成质量闭环，提升客户满意度。"
+          ]
+        },
+        {
+          "id": "f0jqrp2t0",
+          "title": "光激化学发光平台建设与项目开发",
+          "subtitle": "",
+          "dateStr": "研发工程师——2020-2021",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "作为核心人员从无到有搭建平台，主导D-Dimer、NT-proBNP等试剂项目开发、优化及部分注册资料（含技术文档、临床评价）的输出与整理，成功获得产品注册证。作为第一发明人获得的专利授权，专利号：202011171806.9 《一种快速定量检测D-D二聚体的均相荧光免疫的试剂》"
+          ]
+        },
+        {
+          "id": "z3gfe0qwy",
+          "title": "新冠系列产品检测（胶体金）",
+          "subtitle": "",
+          "dateStr": "研发工程师——2019-2020",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "参与新冠抗原（I-V代）、抗体、中和抗体检测试剂的研发、优化、转产及国内、IVDR/MDSAP注册工作，其中新冠抗原产品在多国成功获批上市并获得超高营业额。"
+          ]
+        },
+        {
+          "id": "yrr4hgfca",
+          "title": "免疫层析平台项目优化与支持",
+          "subtitle": "",
+          "dateStr": "研发工程师——2019-2023",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "参与心肌三项、心肺五项、NT-proBNP、D-二聚体等免疫荧光项目的产品迭代、进行外部多中心临床测试协调、FLI4000全自动仪器试剂适配性研究，并在特殊需求时期参与代生产管理。"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4r48m8qio",
+      "title": "自我评价",
+      "visible": true,
+      "items": [
+        {
+          "id": "hak7ktlsd",
+          "title": "",
+          "subtitle": "",
+          "dateStr": "",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "拥有7年+ IVD行业经验，其中近3年专注设计质量与过程质量管控，对医疗器械法规体系（ISO 13485、中国GMP、IVDR） 有自己的理解和实战经验。擅长制程异常分析、客户抱怨处理、CAPA闭环管理，以及检验标准制定、放行审核和质量改善专项推进，持有ISO 13485内审员及风险管理证书，可独立解读国外法规标准。",
+            "同时，我具备强大的执行力、严谨的质量意识和出色的跨部门协作能力，善于梳理优化流程、解决复杂问题。目标驱动，注重结果交付；性格开朗，抗压能力强，富有责任感和团队精神，致力于在IVD领域持续深耕，为产品质量安全保驾护航。"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crj7cqwa1",
+      "title": "工作经历",
+      "visible": true,
+      "items": [
+        {
+          "id": "jvhrnh4vd",
+          "title": "厦门宝太生物科技股份有限公司 ",
+          "subtitle": "质量工程师（DQA主管）",
+          "dateStr": "2023.06 – 至今",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "质量控制设计开发阶段全阶段（重点侧重设计输入/设计输出/设计转换/设计验证）；",
+            "产品迭代过程中NC/客诉/放行/变更等日常质量工作的处理；",
+            "负责医疗器械注册提交资料、厂内DHF/DHR/DMR的审核（国内一类/二类/三类、国际IVDD/IVDR/MDSAP均有涉及）；",
+            "主导国内新项目体考，协助国际IVDR、MDSAP、13485年度到厂审核；定期配合进行厂内各部门内审；",
+            "协调完成新增法规解读，导入并固化至程序文件中",
+            "管理组内相关事务（验证模块、仪器模块）"
+          ]
+        },
+        {
+          "id": "gggjr6ppl",
+          "title": "厦门宝太生物科技股份有限公司",
+          "subtitle": "研发工程师",
+          "dateStr": "2019.07 – 2023.06",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "新项目的研发实验设计、执行、记录及总结汇报；",
+            "研发项目对应部分的注册申报资料（如技术文档、性能评估报告）的梳理、撰写与输出；",
+            "设计转换验证主导监督：从研发阶段向规模化生产转移的流程，确保技术顺利落地,"
+          ]
+        },
+        {
+          "id": "vnj7rb0tw",
+          "title": "福建省水产研究所",
+          "subtitle": "科研助理（实习）",
+          "dateStr": "2018.09 – 2019.05",
+          "location": "",
+          "description": "",
+          "bullets": [
+            "负责实验室日常运营支持，包括试剂耗材采购、来料登记与管理；",
+            "进行河豚毒素提取、ELISA检测实验操作及实验数据记录；",
+            "科研项目申报材料的整理与归档,"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "su4kivat3",
+      "title": "专业技能",
+      "visible": true,
+      "items": [
+        {
+          "id": "63wgca6a6",
+          "title": "质量体系与法规",
+          "subtitle": "",
+          "dateStr": "",
+          "location": "",
+          "description": "熟悉ISO 13485:2016、ISO 9001、中国GMP（医疗器械生产质量管理规范），持有ISO 13485:2016内审员及ISO 14971:2019风险管理证书，具备多次国内体考、国际IVDR/MDSAP迎审经验。",
+          "bullets": []
+        },
+        {
+          "id": "ovo9taegu",
+          "title": "过程质量管控",
+          "subtitle": "",
+          "dateStr": "",
+          "location": "",
+          "description": "熟练运用QC七大手法、五大工具、鱼骨图、树状图、关联图、5WHY等工具进行制程异常、不合格品及客户抱怨的数据收集、分析与闭环处理；擅长制定来料/过程/成品检验标准（SIP），具备检验操作培训经验。",
+          "bullets": []
+        },
+        {
+          "id": "44jl8q5d4",
+          "title": "数据分析与软件",
+          "subtitle": "",
+          "dateStr": "",
+          "location": "",
+          "description": "具备扎实的统计学基础，熟练使用Excel（数据透视、函数）、PPT汇报，掌握过程能力分析（Cpk）、控制图等，用于质量改善专项的监控与结果量化。",
+          "bullets": []
+        },
+        {
+          "id": "ildgmu564",
+          "title": "注册与文档审核",
+          "subtitle": "",
+          "dateStr": "",
+          "location": "",
+          "description": "熟悉医疗器械国内一二三类及国际IVDR注册资料审核，熟练审核DHF/DHR/DMR，能够将法规标准转化为内部检验要求和质量策划方案。2025年部门资源整合后，利用AI工具辅助法规文件审核，在审核工时压缩的情况下保持审查质量与一致性，提升审核效率。",
+          "bullets": []
+        }
+      ]
+    }
+  ],
+  "education": [
+    {
+      "id": "ed1",
+      "degree": "生物技术  学士学位",
+      "institution": "宁德师范学院",
+      "location": "福建宁德",
+      "startDate": "2015.09",
+      "endDate": "2019.06"
+    }
+  ],
+  "employment": [],
+  "skills": [
+    {
+      "id": "sk1",
+      "category": "医疗器械中级工程师",
+      "icon": "fa-solid fa-vial",
+      "items": [
+        "厦门市人力资源和社会保障局  2025.11.16"
+      ]
+    },
+    {
+      "id": "sk2",
+      "category": "ISO 14971:2019 风险管理",
+      "icon": "fa-solid fa-globe",
+      "items": [
+        "SGS&厦门市医疗器械协会 2025.08"
+      ]
+    },
+    {
+      "id": "zun6zpufu",
+      "category": "ISO 13485:2016 内审员",
+      "icon": "fa-solid fa-users",
+      "items": [
+        "SGS&厦门市医疗器械协会 2026.04"
+      ]
+    },
+    {
+      "id": "fy1gsbhf1",
+      "category": "发明专利：一种快速定量检测D-二聚体的均相荧光免疫的试剂",
+      "icon": "fa-solid fa-pen-nib",
+      "items": [
+        "第一发明人，2022.07.08"
+      ]
+    }
+  ],
+  "articles": [],
+  "conferences": [],
+  "societyServices": [
+    "Member, Youth Committee of Sichuan Bioinformatics Society (2023 - present)"
+  ],
+  "reviews": [
+    "Peer Reviewer for Springer Journal: BJC Reports (2024), Journal of Gastrointestinal Cancer (2025)"
+  ],
+  "contributions": [
+    "Provided expert support in protein structure modeling and docking for the paper \"Loss of ESRP2 Activates TAK1-MAPK Signaling through the Fetal RNA-Splicing Program to Promote Hepatocellular Carcinoma Progression\" published in Advanced Science (IF: 14.3) (doi: 10.1002/advs.202305653). Specifically acknowledged in the acknowledgements section. (2023)"
+  ],
+  "fundings": [],
+  "awards": []
+}

@@ -100,29 +100,61 @@ const data = computed({
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-const moveItem = (arr: any[], index: number, direction: number) => {
-  if (index + direction < 0 || index + direction >= arr.length) return;
-  const temp = arr[index];
-  arr[index] = arr[index + direction];
-  arr[index + direction] = temp;
+// Check if a section is visible
+const isSectionVisible = (secId: string): boolean => {
+  if (secId.startsWith('custom-')) {
+    const cId = secId.replace('custom-', '');
+    return data.value.customSections?.some(c => c.id === cId && c.visible) || false;
+  }
+  const settings = data.value.sectionSettings;
+  if (!settings) return true;
+  switch (secId) {
+    case 'education': return settings.education?.visible !== false;
+    case 'employment': return settings.employment?.visible !== false;
+    case 'skills': return settings.skills?.visible !== false;
+    case 'articles': return settings.articles?.visible !== false;
+    case 'conferences': return settings.conferences?.visible !== false;
+    case 'academic': return settings.academic?.visible !== false;
+    case 'awards': return settings.awards?.visible !== false;
+    default: return true;
+  }
 };
 
-const getSectionTitle = (secId: string) => {
+// Filter visible section order
+const visibleSectionOrder = computed(() => {
+  return (data.value.sectionOrder || []).filter(isSectionVisible);
+});
+
+// Move section in order
+const moveSection = (secId: string, direction: number) => {
+  const order = data.value.sectionOrder;
+  if (!order) return;
+  const idx = order.indexOf(secId);
+  if (idx === -1) return;
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= order.length) return;
+  [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
+};
+
+// Get section title with fallback
+const getSectionTitle = (secId: string): string => {
   if (secId.startsWith('custom-')) {
     const cId = secId.replace('custom-', '');
     const cSec = data.value.customSections?.find(c => c.id === cId);
-    return cSec ? (cSec.title || 'Custom Section') : 'Unknown Custom Section';
+    return cSec?.title || 'Custom Section';
   }
-  const mapping: Record<string, string | undefined> = {
-    education: data.value.sectionSettings?.education?.title,
-    employment: data.value.sectionSettings?.employment?.title,
-    skills: data.value.sectionSettings?.skills?.title,
-    articles: data.value.sectionSettings?.articles?.title,
-    conferences: data.value.sectionSettings?.conferences?.title,
-    academic: data.value.sectionSettings?.academic?.title,
-    awards: data.value.sectionSettings?.awards?.title,
+  const settings = data.value.sectionSettings;
+  if (!settings) return secId;
+  const titles: Record<string, string> = {
+    education: settings.education?.title || 'Education',
+    employment: settings.employment?.title || 'Employment',
+    skills: settings.skills?.title || 'Skills',
+    articles: settings.articles?.title || 'Articles',
+    conferences: settings.conferences?.title || 'Conferences',
+    academic: settings.academic?.title || 'Academic',
+    awards: settings.awards?.title || 'Awards',
   };
-  return mapping[secId] || secId;
+  return titles[secId] || secId;
 };
 
 const addCustomSection = () => {
@@ -787,22 +819,22 @@ const handlePhotoUpload = (event: Event) => {
         <p class="text-[10px] text-slate-400 mt-1">{{ t('fontScaleHint') }}</p>
       </div>
 
-      <div class="mb-6 border border-slate-200 rounded-lg bg-white shadow-sm p-4" v-if="data.sectionOrder">
+      <div class="mb-6 border border-slate-200 rounded-lg bg-white shadow-sm p-4" v-if="visibleSectionOrder.length > 0">
         <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
           {{ t('sectionDisplayOrder') }}</h3>
         <p class="text-[10px] text-slate-500 mb-3">{{ t('reorderSectionsInfo') }}</p>
         <div class="space-y-2">
-          <div v-for="(secId, index) in data.sectionOrder" :key="secId"
+          <div v-for="(secId, index) in visibleSectionOrder" :key="secId"
             class="flex justify-between items-center px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-700 font-medium">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-grip-lines text-slate-300"></i>
               <span class="uppercase tracking-wide">{{ getSectionTitle(secId) }}</span>
             </div>
             <div class="flex gap-1">
-              <button @click="moveItem(data.sectionOrder, index, -1)" :disabled="index === 0"
+              <button @click="moveSection(secId, -1)" :disabled="index === 0"
                 class="w-7 h-7 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-500 disabled:opacity-30 flex justify-center items-center transition-colors"><i
                   class="fa-solid fa-arrow-up text-[10px]"></i></button>
-              <button @click="moveItem(data.sectionOrder, index, 1)" :disabled="index === data.sectionOrder.length - 1"
+              <button @click="moveSection(secId, 1)" :disabled="index === visibleSectionOrder.length - 1"
                 class="w-7 h-7 rounded bg-white border border-slate-200 hover:bg-slate-100 text-slate-500 disabled:opacity-30 flex justify-center items-center transition-colors"><i
                   class="fa-solid fa-arrow-down text-[10px]"></i></button>
             </div>
