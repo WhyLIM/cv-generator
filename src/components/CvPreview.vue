@@ -43,17 +43,13 @@ const cssVars = computed(() => {
       </div>
 
       <div class="flex flex-col text-[11px] text-slate-500 space-y-1 text-right pb-1">
-        <p v-if="data.personal.phone" class="flex gap-1.5 items-center justify-end"><i
-            class="fa-solid fa-phone text-[10px] w-3 text-center"></i> {{ data.personal.phone }}</p>
-        <p v-if="data.personal.email" class="flex gap-1.5 items-center justify-end"><i
-            class="fa-solid fa-envelope text-[10px] w-3 text-center"></i> <a :href="'mailto:' + data.personal.email"
-            class="hover:underline">{{ data.personal.email }}</a></p>
-        <p v-if="data.personal.github" class="flex gap-1.5 items-center justify-end"><i
-            class="fa-brands fa-github text-[11px] w-3 text-center"></i> <a :href="data.personal.githubUrl"
-            target="_blank" class="hover:underline">{{ data.personal.githubUrl.replace('https://', '') }}</a></p>
-        <p v-if="data.personal.website" class="flex gap-1.5 items-center justify-end"><i
-            class="fa-solid fa-link text-[10px] w-3 text-center"></i> <a :href="data.personal.websiteUrl"
-            target="_blank" class="hover:underline">{{ data.personal.websiteUrl.replace('https://', '') }}</a></p>
+        <template v-for="link in (data.personal.contactLinks || []).filter(l => l.visible !== false && (l.label || l.url))" :key="link.id">
+          <p class="flex gap-1.5 items-center justify-end">
+            <i :class="(link.icon || 'fa-solid fa-link') + ' text-[10px] w-3 text-center'"></i>
+            <a v-if="link.url" :href="link.url" target="_blank" rel="noopener" class="hover:underline">{{ link.label || link.url.replace(/^(tel:|mailto:|https?:\/\/)/, '') }}</a>
+            <span v-else>{{ link.label }}</span>
+          </p>
+        </template>
       </div>
     </header>
 
@@ -279,13 +275,16 @@ const cssVars = computed(() => {
                 {{ item.subtitle }}<span v-if="item.subtitle && item.location">, </span>{{ item.location }}
               </p>
             </div>
-            <p v-if="item.description" class="text-xs text-slate-600 leading-snug mb-1">
+            <p v-if="item.description" class="text-xs text-slate-600 leading-snug mb-1 text-justify">
               {{ item.description }}
             </p>
-            <ul v-if="item.bullets && item.bullets.length > 0" class="space-y-1 mt-1">
+            <ul v-if="item.bullets && item.bullets.length > 0" class="space-y-1 mt-1 list-none">
               <li v-for="(bullet, bIdx) in item.bullets" :key="bIdx"
-                class="text-xs text-slate-600 pl-[1em] -indent-[1em]">
-                <span class="inline-block w-[1em] text-center !indent-0">•</span> {{ bullet }}
+                class="text-xs text-slate-600 grid grid-cols-[1.5em_1fr] col-gap-0">
+                <span class="text-center text-slate-500">
+                  {{ item.bulletListType === 'ordered' ? (bIdx + 1) + '.' : '•' }}
+                </span>
+                <span class="text-justify">{{ bullet }}</span>
               </li>
             </ul>
           </div>

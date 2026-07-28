@@ -46,7 +46,7 @@ const handleSave = () => {
   if (cvData.value.personal) {
     const now = new Date();
     const formattedDate = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
-    cvData.value.personal.lastModifiedText = `Last modified: ${formattedDate}`;
+    cvData.value.personal.lastModifiedText = `${t('lastModified')}${formattedDate}`;
   }
   localStorage.setItem('cv-generator-data', JSON.stringify(cvData.value));
   lastSaved.value = new Date();

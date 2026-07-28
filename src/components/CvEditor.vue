@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import EditorSection from './EditorSection.vue';
+import LineNumberedTextarea from './LineNumberedTextarea.vue';
 import IconPicker from './IconPicker.vue';
 import type { CvData } from '../types';
 import { parseBibtex } from '../lib/bibtex';
 import { useLocale } from '../composables/useLocale';
 
-const { t } = useLocale();
+const { t, isZh } = useLocale();
 
 const props = defineProps<{
   modelValue: CvData;
@@ -36,7 +37,7 @@ const data = computed({
       if (!val.customSections) val.customSections = [];
       modified = true;
     }
-    
+
     // Auto-migrate section order
     if (!val.sectionOrder) {
       val.sectionOrder = ['education', 'employment', 'skills', 'articles', 'conferences', 'academic', 'awards'];
@@ -47,7 +48,7 @@ const data = computed({
     } else {
       // Deduplicate sectionOrder first
       val.sectionOrder = [...new Set(val.sectionOrder)];
-      
+
       // Ensure existing custom customSections are in sectionOrder
       if (val.customSections) {
         val.customSections.forEach(cs => {
@@ -57,12 +58,12 @@ const data = computed({
           }
         });
       }
-      
+
       // Remove sectionOrder entries that don't exist in data
       const validSections = ['education', 'employment', 'skills', 'articles', 'conferences', 'academic', 'awards'];
       const customSectionIds = val.customSections ? val.customSections.map(cs => 'custom-' + cs.id) : [];
       const validOrder = val.sectionOrder.filter((id: string) => validSections.includes(id) || customSectionIds.includes(id));
-      
+
       // Only update if there were duplicates or invalid entries
       if (val.sectionOrder.length !== validOrder.length) {
         val.sectionOrder = validOrder;
@@ -76,11 +77,24 @@ const data = computed({
       modified = true;
     }
 
+    // Migrate legacy phone/email/github/website fields into contactLinks
+    if (val.personal && val.personal.contactLinks === undefined) {
+      const legacy = val.personal;
+      const links: any[] = [];
+      if (legacy.phone) links.push({ id: generateId(), label: legacy.phone, url: 'tel:' + legacy.phone.replace(/\s+/g, ''), icon: 'fa-solid fa-phone', visible: true });
+      if (legacy.email) links.push({ id: generateId(), label: legacy.email, url: 'mailto:' + legacy.email, icon: 'fa-solid fa-envelope', visible: true });
+      if (legacy.githubUrl) links.push({ id: generateId(), label: legacy.github || legacy.githubUrl.replace(/^https?:\/\//, ''), url: legacy.githubUrl, icon: 'fa-brands fa-github', visible: !!legacy.github });
+      if (legacy.websiteUrl) links.push({ id: generateId(), label: legacy.website || legacy.websiteUrl.replace(/^https?:\/\//, ''), url: legacy.websiteUrl, icon: 'fa-solid fa-globe', visible: !!legacy.website });
+      val.personal.contactLinks = links;
+      modified = true;
+    }
+
     if (val.personal && val.personal.showFooterTitle === undefined) {
       val.personal.showFooterTitle = true;
       val.personal.footerTitle = 'Curriculum Vitae';
       val.personal.showLastModified = true;
-      val.personal.lastModifiedText = `Last modified: ${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`;
+      const lastModPrefix = isZh.value ? '最后修改日期：' : 'Last modified: ';
+      val.personal.lastModifiedText = `${lastModPrefix}${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`;
       modified = true;
     }
 
@@ -88,6 +102,18 @@ const data = computed({
     if (val.fontScale === undefined) {
       val.fontScale = 1;
       modified = true;
+    }
+
+    // Migrate custom items: default bulletListType
+    if (val.customSections) {
+      val.customSections.forEach(cs => {
+        cs.items?.forEach(item => {
+          if (item.bulletListType === undefined) {
+            item.bulletListType = 'unordered';
+            modified = true;
+          }
+        });
+      });
     }
 
     if (modified) {
@@ -209,6 +235,27 @@ const handlePhotoUpload = (event: Event) => {
     reader.readAsDataURL(file);
   }
 };
+
+// --- Contact link helpers ---
+const addContactLink = (preset?: 'phone' | 'email' | 'github') => {
+  if (!data.value.personal.contactLinks) data.value.personal.contactLinks = [];
+  let newLink: any;
+  if (preset === 'phone') {
+    newLink = { id: generateId(), label: '', url: 'tel:', icon: 'fa-solid fa-phone', visible: true };
+  } else if (preset === 'email') {
+    newLink = { id: generateId(), label: '', url: 'mailto:', icon: 'fa-solid fa-envelope', visible: true };
+  } else if (preset === 'github') {
+    newLink = { id: generateId(), label: '', url: 'https://github.com/', icon: 'fa-brands fa-github', visible: true };
+  } else {
+    newLink = { id: generateId(), label: '', url: '', icon: 'fa-solid fa-link', visible: true };
+  }
+  data.value.personal.contactLinks.push(newLink);
+};
+
+const removeContactLink = (idx: number) => {
+  if (!data.value.personal.contactLinks) return;
+  data.value.personal.contactLinks.splice(idx, 1);
+};
 </script>
 
 <template>
@@ -226,8 +273,8 @@ const handlePhotoUpload = (event: Event) => {
               v-model="data.personal.nameZh"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('documentTitle') || 'Document Title' }}</label><input
-              v-model="data.personal.documentTitle" :disabled="!data.personal.showDocumentTitle"
+          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('documentTitle') || 'Document Title'
+          }}</label><input v-model="data.personal.documentTitle" :disabled="!data.personal.showDocumentTitle"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
           </div>
           <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showDocTitle') }}</label>
@@ -242,32 +289,83 @@ const handlePhotoUpload = (event: Event) => {
               </label>
             </div>
           </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('phone') }}</label><input
-              v-model="data.personal.phone"
-              class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
-          </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('email') }}</label><input
-              v-model="data.personal.email"
-              class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
-          </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('github') }}</label><input
-              v-model="data.personal.github"
-              class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
-          </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('githubUrl') }}</label><input
-              v-model="data.personal.githubUrl"
-              class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
-          </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('website') }}</label><input
-              v-model="data.personal.website"
-              class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
-          </div>
-          <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('websiteUrl') }}</label><input
-              v-model="data.personal.websiteUrl"
-              class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
-          </div>
         </div>
       </EditorSection>
+
+      <!-- Contact links section -->
+      <div class="mt-6">
+        <EditorSection :title="t('contactInfo')" :data="data.personal" @update="data.personal = $event">
+          <p class="text-[10px] text-slate-500 -mt-1 mb-3 leading-relaxed">{{ t('contactInfoHint') }}</p>
+          <div class="space-y-2">
+            <div v-for="(link, idx) in (data.personal.contactLinks || [])" :key="link.id"
+              class="p-2.5 border border-slate-200 bg-slate-50/60 rounded-lg group">
+              <!-- Header row: icon + label preview + controls -->
+              <div class="flex items-center gap-2">
+                <span
+                  class="w-7 h-7 flex items-center justify-center rounded bg-white border border-slate-200 text-slate-500 shrink-0">
+                  <i :class="link.icon || 'fa-solid fa-link'"></i>
+                </span>
+                <span class="flex-1 text-xs font-medium text-slate-700 truncate min-w-0">
+                  {{ link.label || link.url || t('untitledItem') }}
+                </span>
+                <label class="inline-flex items-center cursor-pointer shrink-0" :title="t('visible')">
+                  <input type="checkbox" v-model="link.visible" class="sr-only peer">
+                  <div
+                    class="w-7 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-[#01a3a4] relative">
+                  </div>
+                </label>
+                <button @click="moveItem(data.personal.contactLinks!, idx, -1)" :disabled="idx === 0"
+                  class="w-6 h-6 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 disabled:opacity-30 disabled:hover:bg-white shadow-sm flex items-center justify-center"><i
+                    class="fa-solid fa-arrow-up text-[10px]"></i></button>
+                <button @click="moveItem(data.personal.contactLinks!, idx, 1)"
+                  :disabled="idx === (data.personal.contactLinks || []).length - 1"
+                  class="w-6 h-6 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 disabled:opacity-30 disabled:hover:bg-white shadow-sm flex items-center justify-center"><i
+                    class="fa-solid fa-arrow-down text-[10px]"></i></button>
+                <button @click="removeContactLink(idx)"
+                  class="w-6 h-6 rounded bg-white hover:bg-red-50 border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 shadow-sm flex items-center justify-center"><i
+                    class="fa-solid fa-trash text-[10px]"></i></button>
+              </div>
+              <!-- Detail fields -->
+              <div class="grid grid-cols-12 gap-2 mt-2">
+                <div class="col-span-5">
+                  <label class="block text-[9px] text-slate-500 font-bold mb-0.5">{{ t('contactLabel') }}</label>
+                  <input v-model="link.label" :placeholder="t('contactLabelPlaceholder')"
+                    class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                </div>
+                <div class="col-span-7">
+                  <label class="block text-[9px] text-slate-500 font-bold mb-0.5">{{ t('contactUrl') }}</label>
+                  <input v-model="link.url" :placeholder="t('contactUrlPlaceholder')"
+                    class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                </div>
+                <div class="col-span-12">
+                  <label class="block text-[9px] text-slate-500 font-bold mb-0.5">{{ t('contactIcon') }}</label>
+                  <IconPicker v-model="link.icon" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Add buttons -->
+            <div class="flex flex-wrap items-center gap-2 pt-2">
+              <button @click="addContactLink('phone')"
+                class="px-3 py-1.5 border border-dashed border-slate-300 rounded-lg text-slate-600 text-[11px] font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-phone text-[10px]"></i> {{ t('presetPhone') }}
+              </button>
+              <button @click="addContactLink('email')"
+                class="px-3 py-1.5 border border-dashed border-slate-300 rounded-lg text-slate-600 text-[11px] font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-envelope text-[10px]"></i> {{ t('presetEmail') }}
+              </button>
+              <button @click="addContactLink('github')"
+                class="px-3 py-1.5 border border-dashed border-slate-300 rounded-lg text-slate-600 text-[11px] font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors flex items-center gap-1.5">
+                <i class="fa-brands fa-github text-[10px]"></i> {{ t('presetGithub') }}
+              </button>
+              <button @click="addContactLink()"
+                class="px-3 py-1.5 border border-dashed border-slate-300 rounded-lg text-slate-600 text-[11px] font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-plus text-[10px]"></i> {{ t('addContact') }}
+              </button>
+            </div>
+          </div>
+        </EditorSection>
+      </div>
 
       <div class="mt-6">
         <EditorSection :title="t('profilePhoto')" :data="data.personal" @update="data.personal = $event">
@@ -323,7 +421,7 @@ const handlePhotoUpload = (event: Event) => {
                 <input v-model="data.personal.lastModifiedText" :disabled="!data.personal.showLastModified"
                   class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
                 <button
-                  @click="data.personal.lastModifiedText = `${t('lastModified')} ${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`"
+                  @click="data.personal.lastModifiedText = `${t('lastModified')}${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`"
                   :disabled="!data.personal.showLastModified" :title="t('syncToToday')"
                   class="px-2 border border-slate-200 rounded bg-white text-slate-500 disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed hover:bg-slate-50 hover:text-[#01a3a4] hover:border-[#01a3a4]/30 transition-colors">
                   <i class="fa-solid fa-clock-rotate-left"></i>
@@ -359,9 +457,8 @@ const handlePhotoUpload = (event: Event) => {
             <button class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"
               @click="data.education.splice(idx, 1)"><i class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2">
-              <div class="col-span-2"><label
-                  class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('institutionName') }}</label><input
-                  v-model="ed.institution" :placeholder="t('enterInstitution')"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                t('institutionName') }}</label><input v-model="ed.institution" :placeholder="t('enterInstitution')"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('degree') }}</label><input
@@ -426,7 +523,8 @@ const handlePhotoUpload = (event: Event) => {
     <!-- ARTICLES TAB -->
     <template v-if="activeTab === 'articles'">
       <div class="mb-4 bg-white border border-[#01a3a4]/20 rounded-lg p-3">
-        <label class="block text-xs font-bold text-[#01a3a4] mb-2"><i class="fa-solid fa-file-import mr-1"></i> {{ t('importBibtex') }}</label>
+        <label class="block text-xs font-bold text-[#01a3a4] mb-2"><i class="fa-solid fa-file-import mr-1"></i> {{
+          t('importBibtex') }}</label>
         <textarea v-model="bibtexInput"
           class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors resize-y h-24 custom-scrollbar mb-2"
           :placeholder="t('bibtexPlaceholder')"></textarea>
@@ -466,31 +564,32 @@ const handlePhotoUpload = (event: Event) => {
             <!-- Body of the article -->
             <div v-show="!ar._collapsed" class="mt-3 pt-3 border-t border-[#01a3a4]/20">
               <div class="grid grid-cols-12 gap-3 mb-3">
-                <div class="col-span-12"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('title') }}</label><input v-model="ar.title"
+                <div class="col-span-12"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('title')
+                }}</label><input v-model="ar.title"
                     class="w-full font-semibold text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('journalName') }}</label><input v-model="ar.journal"
+                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
+                  t('journalName') }}</label><input v-model="ar.journal"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('doi') }}</label><input
-                    v-model="ar.doi"
+                <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('doi')
+                }}</label><input v-model="ar.doi"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-3"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('year') }}</label><input v-model="ar.year"
+                <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('year')
+                }}</label><input v-model="ar.year"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-3"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('volumeIssue') }}</label><input
-                    v-model="ar.volumeAndIssue"
+                <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
+                  t('volumeIssue') }}</label><input v-model="ar.volumeAndIssue"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-3"><label
-                    class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('pages') }}</label><input v-model="ar.pages"
+                <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('pages')
+                }}</label><input v-model="ar.pages"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
-                <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('impactFactor') }}</label><input type="number" step="0.1" v-model="ar.impactFactor"
+                <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
+                  t('impactFactor') }}</label><input type="number" step="0.1" v-model="ar.impactFactor"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]"
                     :placeholder="t('impactFactorNote')"></div>
               </div>
@@ -510,15 +609,16 @@ const handlePhotoUpload = (event: Event) => {
                     <div class="flex flex-row text-[9px] divide-x divide-slate-100 border-t border-slate-100">
                       <button @click="au.isMe = !au.isMe"
                         :class="au.isMe ? 'bg-[#01a3a4] text-white' : 'text-slate-500 hover:bg-slate-50'"
-                        class="flex-1 py-1 px-1 text-center transition-colors" :title="t('toggleMe')">{{ t('me') }}</button>
+                        class="flex-1 py-1 px-1 text-center transition-colors" :title="t('toggleMe')">{{ t('me')
+                        }}</button>
                       <button @click="au.isFirst = !au.isFirst"
                         :class="au.isFirst ? 'bg-orange-500 text-white' : 'text-slate-500 hover:bg-slate-50'"
-                        class="flex-1 py-1 px-1 text-center transition-colors"
-                        :title="t('toggleFirst')">{{ t('firstAuthor') }}</button>
+                        class="flex-1 py-1 px-1 text-center transition-colors" :title="t('toggleFirst')">{{
+                          t('firstAuthor') }}</button>
                       <button @click="au.isCorresponding = !au.isCorresponding"
                         :class="au.isCorresponding ? 'bg-blue-500 text-white' : 'text-slate-500 hover:bg-slate-50'"
-                        class="flex-1 py-1 px-1 text-center transition-colors"
-                        :title="t('toggleCorresponding')">{{ t('corresponding') }}</button>
+                        class="flex-1 py-1 px-1 text-center transition-colors" :title="t('toggleCorresponding')">{{
+                          t('corresponding') }}</button>
                     </div>
                   </div>
                   <button
@@ -546,7 +646,8 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('conferenceName') }}</label><input v-model="cf.name"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                t('conferenceName') }}</label><input v-model="cf.name"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
@@ -557,7 +658,8 @@ const handlePhotoUpload = (event: Event) => {
                   v-model="cf.location"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('type') }}</label><input v-model="cf.type"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('type')
+              }}</label><input v-model="cf.type"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white"
                   :placeholder="t('conferenceTypeHint')">
               </div>
@@ -582,13 +684,12 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label
-                  class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('roleTitle') }}</label><input v-model="em.role"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('roleTitle')
+              }}</label><input v-model="em.role"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div class="col-span-2"><label
-                  class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('institutionCompany') }}</label><input
-                  v-model="em.institution"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                t('institutionCompany') }}</label><input v-model="em.institution"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
@@ -596,15 +697,17 @@ const handlePhotoUpload = (event: Event) => {
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="flex gap-2">
-                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('startDate') }}</label><input v-model="em.startDate"
+                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('startDate')
+                }}</label><input v-model="em.startDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
-                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('endDate') }}</label><input
-                    v-model="em.endDate"
+                <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('endDate')
+                }}</label><input v-model="em.endDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
               </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('descriptionOptional') }}</label><textarea v-model="em.description" rows="2"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                t('descriptionOptional') }}</label><textarea v-model="em.description" rows="2"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white resize-y"
                   :placeholder="t('enterDescription')"></textarea>
               </div>
@@ -629,11 +732,12 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('awardTitle') }}</label><input v-model="aw.title"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('awardTitle')
+              }}</label><input v-model="aw.title"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('issuerOrganizer') }}</label><input
-                  v-model="aw.issuer"
+              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('issuerOrganizer')
+              }}</label><input v-model="aw.issuer"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
@@ -665,10 +769,12 @@ const handlePhotoUpload = (event: Event) => {
               class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('projectTitle') }}</label><input v-model="fd.title"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                t('projectTitle') }}</label><input v-model="fd.title"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('fundingSource') }}</label><input v-model="fd.source"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                t('fundingSource') }}</label><input v-model="fd.source"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('grantNo') }}</label><input
@@ -679,7 +785,8 @@ const handlePhotoUpload = (event: Event) => {
                   v-model="fd.period"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('yourRole') }}</label><input v-model="fd.role"
+              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('yourRole')
+              }}</label><input v-model="fd.role"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
             </div>
@@ -699,15 +806,17 @@ const handlePhotoUpload = (event: Event) => {
           {{ t('simpleListHint') }}
         </div>
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('societyServices') }}
+          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{
+            t('societyServices') }}
             <span class="font-normal text-slate-400">({{ data.societyServices.length }} items)</span></label>
         </div>
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('reviews') }} <span
-              class="font-normal text-slate-400">({{ data.reviews.length }} items)</span></label>
+          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('reviews') }}
+            <span class="font-normal text-slate-400">({{ data.reviews.length }} items)</span></label>
         </div>
         <div class="mb-2">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('contributions') }}
+          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{
+            t('contributions') }}
             <span class="font-normal text-slate-400">({{ data.contributions.length }} items)</span></label>
         </div>
       </EditorSection>
@@ -732,7 +841,8 @@ const handlePhotoUpload = (event: Event) => {
                 :placeholder="t('customSectionTitle')">
             </div>
             <button @click="removeCustomSection(sIdx)"
-              class="text-[10px] text-red-500 hover:text-red-600 transition shrink-0 font-medium">{{ t('removeSection') }}</button>
+              class="text-[10px] text-red-500 hover:text-red-600 transition shrink-0 font-medium">{{ t('removeSection')
+              }}</button>
           </div>
 
           <div class="p-4 bg-white" :class="{ 'opacity-50 grayscale transition-all duration-300': !sec.visible }">
@@ -764,35 +874,48 @@ const handlePhotoUpload = (event: Event) => {
                 <!-- Collapsible body -->
                 <div v-show="!item._collapsed" class="mt-3 pt-3 border-t border-slate-200">
                   <div class="grid grid-cols-2 gap-3 mb-2">
-                    <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('itemTitle') }}</label><input v-model="item.title" :placeholder="t('projectName')"
+                    <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                      t('itemTitle') }}</label><input v-model="item.title" :placeholder="t('projectName')"
                         class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
-                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('subtitle') }}</label><input
-                        v-model="item.subtitle"
+                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('subtitle')
+                    }}</label><input v-model="item.subtitle"
                         class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
                     <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
                         v-model="item.dateStr"
                         class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
-                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location') }}</label><input
-                        v-model="item.location"
+                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location')
+                    }}</label><input v-model="item.location"
                         class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
                     <div class="col-span-2">
                       <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('description') }}</label>
-                      <textarea v-model="item.description"
-                        class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
-                        rows="2"></textarea>
+                      <LineNumberedTextarea v-model="item.description" :rows="2" />
                     </div>
                   </div>
                   <div class="mt-2 border-t border-slate-200 pt-2">
-                    <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('bulletPoints') }} <span
-                        class="font-normal">{{ t('bulletPointsHint') }}</span></label>
-                    <textarea :value="item.bullets?.join('\n')"
-                      @change="(e) => item.bullets = (e.target as HTMLTextAreaElement).value.split('\n').map(s => s.trim()).filter(s => s)"
-                      class="w-full text-xs border border-slate-200 bg-white rounded p-2 outline-none focus:border-[#01a3a4] resize-y custom-scrollbar"
-                      rows="3"></textarea>
+                    <div class="flex items-center justify-between mb-1">
+                      <label class="block text-[10px] text-slate-500 font-bold">
+                        {{ t('bulletPoints') }} <span class="font-normal">{{ t('bulletPointsHint') }}</span>
+                      </label>
+                      <div class="inline-flex border border-slate-200 rounded overflow-hidden text-[10px]">
+                        <button type="button" @click="item.bulletListType = 'unordered'"
+                          :class="item.bulletListType !== 'ordered' ? 'bg-[#01a3a4] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'"
+                          class="px-2 py-0.5 transition-colors" :title="t('unorderedList')">
+                          <i class="fa-solid fa-list-ul"></i>
+                        </button>
+                        <button type="button" @click="item.bulletListType = 'ordered'"
+                          :class="item.bulletListType === 'ordered' ? 'bg-[#01a3a4] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'"
+                          class="px-2 py-0.5 transition-colors border-l border-slate-200" :title="t('orderedList')">
+                          <i class="fa-solid fa-list-ol"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <LineNumberedTextarea :model-value="item.bullets?.join('\n')"
+                      @update:model-value="(v: string) => item.bullets = v.split('\n').map(s => s.trim()).filter(s => s)"
+                      :rows="3" />
                   </div>
                 </div>
               </div>
@@ -814,7 +937,8 @@ const handlePhotoUpload = (event: Event) => {
     <!-- SETTINGS / RAW TEMPLATE TAB -->
     <template v-if="activeTab === 'settings'">
       <div class="mb-4 border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm p-4">
-        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">{{ t('globalSettings') }}</h3>
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">{{
+          t('globalSettings') }}</h3>
         <label class="block text-xs font-bold text-slate-500 mb-2">{{ t('themeColor') }}</label>
         <div class="flex items-center gap-3">
           <input type="color" v-model="data.themeColor"
@@ -875,7 +999,8 @@ const handlePhotoUpload = (event: Event) => {
       <EditorSection :title="t('dataSourceInspection')" :data="data" @update="emit('update:modelValue', $event)">
         <div
           class="p-4 bg-orange-50 text-orange-800 text-xs rounded border border-orange-200 leading-relaxed shadow-inner">
-          <p class="font-bold mb-1 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> {{ t('advancedUseOnly') }}</p>
+          <p class="font-bold mb-1 text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> {{
+            t('advancedUseOnly') }}</p>
           <p>{{ t('jsonTabHint') }}</p>
         </div>
       </EditorSection>

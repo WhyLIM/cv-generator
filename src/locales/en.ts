@@ -86,6 +86,8 @@ export const en = {
   bullets: 'Bullet Points',
   bulletPoints: 'Bullet Points',
   bulletPointsHint: 'One per line',
+  unorderedList: 'Unordered List',
+  orderedList: 'Ordered List',
   awardTitle: 'Award Title',
   issuer: 'Issuer / Organizer',
   issuerOrganizer: 'Issuer / Organizer',
@@ -165,13 +167,37 @@ export const en = {
 
   // Tooltips
   toggleVisibility: 'Toggle section visibility',
+  commonIcons: 'Common Icons',
+  iconGroup_development: 'Development & Tools',
+  iconGroup_science: 'Science & Research',
+  iconGroup_charts: 'Charts & Data',
+  iconGroup_business: 'Business & Work',
+  iconGroup_media: 'Media & Files',
+  iconGroup_contact: 'Communication & Contact',
+  iconGroup_brandsTech: 'Brands - Tech',
+  iconGroup_brandsSocial: 'Brands - Social & Academic',
+  iconGroup_misc: 'Misc',
 
   // Custom Section Info
   customSectionInfo: 'Custom sections allow you to create completely new resume blocks (e.g., Projects, Volunteering, Certificates) with custom titles and generic content structures.',
 
   // Footer
   curriculumVitae: 'Curriculum Vitae',
-  lastModified: 'Last modified:',
+  lastModified: 'Last modified: ',
+
+  // Contact links
+  contactInfo: 'Contact Info',
+  contactInfoHint: 'Add as many contact methods as you like. Reorder, hide, or remove any of them. Each row supports a custom icon and label.',
+  contactLabel: 'Label',
+  contactLabelPlaceholder: 'e.g. WhyLIM, +86 1885...',
+  contactUrl: 'URL / Target',
+  contactUrlPlaceholder: 'https://, mailto:, tel: supported',
+  contactIcon: 'Icon',
+  addContact: 'Custom Link',
+  presetPhone: 'Phone',
+  presetEmail: 'Email',
+  presetGithub: 'GitHub',
+  visible: 'Visible',
 
   // BibTeX
   bibtexPlaceholder: 'Paste BibTeX entries here...',

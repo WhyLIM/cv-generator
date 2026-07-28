@@ -86,6 +86,8 @@ export const zh = {
   bullets: '要点列表',
   bulletPoints: '要点列表',
   bulletPointsHint: '每行一条',
+  unorderedList: '无序列表',
+  orderedList: '有序列表',
   awardTitle: '奖项名称',
   issuer: '颁发机构',
   issuerOrganizer: '颁发机构',
@@ -165,13 +167,37 @@ export const zh = {
 
   // Tooltips
   toggleVisibility: '切换模块可见性',
+  commonIcons: '常用图标',
+  iconGroup_development: '开发与工具',
+  iconGroup_science: '科学与研究',
+  iconGroup_charts: '图表与数据',
+  iconGroup_business: '商业与工作',
+  iconGroup_media: '媒体与文件',
+  iconGroup_contact: '通讯与联系方式',
+  iconGroup_brandsTech: '品牌 - 科技',
+  iconGroup_brandsSocial: '品牌 - 社交与学术',
+  iconGroup_misc: '其他',
 
   // Custom Section Info
   customSectionInfo: '自定义模块允许您创建全新的简历模块（如：项目经历、志愿服务、证书等），支持自定义标题和通用内容结构。',
 
   // Footer
   curriculumVitae: '简历',
-  lastModified: '最后更新：',
+  lastModified: '最后修改日期：',
+
+  // 联系方式
+  contactInfo: '联系方式',
+  contactInfoHint: '根据需要添加任意数量的联系方式。可调整顺序、隐藏或删除。每一行均支持自定义图标与显示文字。',
+  contactLabel: '显示文字',
+  contactLabelPlaceholder: '例如：WhyLIM、+86 1885...',
+  contactUrl: '链接目标',
+  contactUrlPlaceholder: '支持 https:// / mailto: / tel:',
+  contactIcon: '图标',
+  addContact: '自定义链接',
+  presetPhone: '电话',
+  presetEmail: '邮箱',
+  presetGithub: 'GitHub',
+  visible: '可见',
 
   // BibTeX
   bibtexPlaceholder: '在此粘贴 BibTeX 条目...',

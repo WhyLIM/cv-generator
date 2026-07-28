@@ -87,6 +87,7 @@ export interface CustomItem {
   location: string;
   description: string;
   bullets: string[];
+  bulletListType?: 'unordered' | 'ordered';
 }
 
 export interface CustomSection {
@@ -96,18 +97,30 @@ export interface CustomSection {
   items: CustomItem[];
 }
 
+// 一个联系方式条目（如邮箱 / 电话 / GitHub / 个人网站等）
+export interface ContactLink {
+  id: string;
+  label: string;        // 显示文字；空字符串时回退为去掉协议的 url
+  url: string;          // 完整链接目标（支持 tel: / mailto: / https://）
+  icon: string;         // FontAwesome class，如 'fa-solid fa-phone'
+  visible?: boolean;    // 默认 true；false 时不在预览中渲染
+}
+
 export interface CvData {
   themeColor: string;
   fontScale?: number; // 字体缩放比例，默认 1.0
   personal: {
     name: string;
     nameZh?: string;
-    phone: string;
-    email: string;
-    github: string;
-    githubUrl: string;
-    website: string;
-    websiteUrl: string;
+    // 旧联系方式字段（保留以便一次性迁移到 contactLinks），不再在 UI 中编辑
+    phone?: string;
+    email?: string;
+    github?: string;
+    githubUrl?: string;
+    website?: string;
+    websiteUrl?: string;
+    // 新的联系方式列表（替代上述旧字段）
+    contactLinks?: ContactLink[];
     photoUrl?: string;     // Added
     showPhoto?: boolean;   // Added
     documentTitle?: string;
