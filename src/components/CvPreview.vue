@@ -12,16 +12,29 @@ const formatAuthor = (author: Author) => {
 
 // Generate CSS variable for the theme color and font scale dynamically
 const cssVars = computed(() => {
+  // 西文字体优先，中文回退到中文字体，再回退到系统字体
+  const fontFamily = [
+    props.data.fontFamily || 'Inter',
+    props.data.fontFamilyZh || "'Noto Sans SC'",
+    'ui-sans-serif',
+    'system-ui',
+    'sans-serif',
+  ].join(', ');
+  const scale = props.data.fontScale || 1;
   return {
     '--theme-color': props.data.themeColor,
-    '--font-scale': props.data.fontScale || 1,
+    '--font-scale': scale,
+    fontFamily,
+    zoom: scale,
+    // 预览内边距除以缩放，使视觉内边距恒等于打印页边距（zoom 会连带放大 padding）
+    padding: `calc(var(--print-margin-v) / ${scale}) calc(var(--print-margin-h) / ${scale})`,
   };
 });
 </script>
 
 <template>
   <div
-    class="print-container bg-white text-slate-800 w-[210mm] min-h-[297mm] mx-auto p-10 md:p-14 block text-[13px] md:text-[14px] leading-relaxed"
+    class="print-container bg-white text-slate-800 w-[210mm] min-h-[297mm] mx-auto block text-[13px] md:text-[14px] leading-relaxed"
     :style="cssVars">
 
     <!-- PROFILE PHOTO (Floated Top-Right) -->

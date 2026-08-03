@@ -46,8 +46,12 @@ const data = computed({
       }
       modified = true;
     } else {
-      // Deduplicate sectionOrder first
-      val.sectionOrder = [...new Set(val.sectionOrder)];
+      // Deduplicate sectionOrder only when duplicates exist (avoid infinite loop)
+      const deduped = [...new Set(val.sectionOrder)];
+      if (deduped.length !== val.sectionOrder.length) {
+        val.sectionOrder = deduped;
+        modified = true;
+      }
 
       // Ensure existing custom customSections are in sectionOrder
       if (val.customSections) {
@@ -101,6 +105,18 @@ const data = computed({
     // Initialize fontScale if not set
     if (val.fontScale === undefined) {
       val.fontScale = 1;
+      modified = true;
+    }
+
+    // Initialize fontFamily if not set
+    if (val.fontFamily === undefined) {
+      val.fontFamily = 'Inter';
+      modified = true;
+    }
+
+    // Initialize fontFamilyZh if not set
+    if (val.fontFamilyZh === undefined) {
+      val.fontFamilyZh = "'Noto Sans SC'";
       modified = true;
     }
 
@@ -274,7 +290,7 @@ const removeContactLink = (idx: number) => {
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
           <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('documentTitle') || 'Document Title'
-          }}</label><input v-model="data.personal.documentTitle" :disabled="!data.personal.showDocumentTitle"
+              }}</label><input v-model="data.personal.documentTitle" :disabled="!data.personal.showDocumentTitle"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
           </div>
           <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showDocTitle') }}</label>
@@ -565,7 +581,7 @@ const removeContactLink = (idx: number) => {
             <div v-show="!ar._collapsed" class="mt-3 pt-3 border-t border-[#01a3a4]/20">
               <div class="grid grid-cols-12 gap-3 mb-3">
                 <div class="col-span-12"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('title')
-                }}</label><input v-model="ar.title"
+                    }}</label><input v-model="ar.title"
                     class="w-full font-semibold text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
@@ -573,11 +589,11 @@ const removeContactLink = (idx: number) => {
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('doi')
-                }}</label><input v-model="ar.doi"
+                    }}</label><input v-model="ar.doi"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('year')
-                }}</label><input v-model="ar.year"
+                    }}</label><input v-model="ar.year"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
@@ -585,7 +601,7 @@ const removeContactLink = (idx: number) => {
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('pages')
-                }}</label><input v-model="ar.pages"
+                    }}</label><input v-model="ar.pages"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
@@ -659,7 +675,7 @@ const removeContactLink = (idx: number) => {
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('type')
-              }}</label><input v-model="cf.type"
+                  }}</label><input v-model="cf.type"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white"
                   :placeholder="t('conferenceTypeHint')">
               </div>
@@ -685,7 +701,7 @@ const removeContactLink = (idx: number) => {
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('roleTitle')
-              }}</label><input v-model="em.role"
+                  }}</label><input v-model="em.role"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
@@ -698,11 +714,11 @@ const removeContactLink = (idx: number) => {
               </div>
               <div class="flex gap-2">
                 <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('startDate')
-                }}</label><input v-model="em.startDate"
+                    }}</label><input v-model="em.startDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
                 <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('endDate')
-                }}</label><input v-model="em.endDate"
+                    }}</label><input v-model="em.endDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
               </div>
@@ -733,11 +749,11 @@ const removeContactLink = (idx: number) => {
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('awardTitle')
-              }}</label><input v-model="aw.title"
+                  }}</label><input v-model="aw.title"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('issuerOrganizer')
-              }}</label><input v-model="aw.issuer"
+                  }}</label><input v-model="aw.issuer"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
@@ -786,7 +802,7 @@ const removeContactLink = (idx: number) => {
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('yourRole')
-              }}</label><input v-model="fd.role"
+                  }}</label><input v-model="fd.role"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
             </div>
@@ -879,7 +895,7 @@ const removeContactLink = (idx: number) => {
                         class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
                     <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('subtitle')
-                    }}</label><input v-model="item.subtitle"
+                        }}</label><input v-model="item.subtitle"
                         class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
                     <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
@@ -887,7 +903,7 @@ const removeContactLink = (idx: number) => {
                         class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
                     <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location')
-                    }}</label><input v-model="item.location"
+                        }}</label><input v-model="item.location"
                         class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                     </div>
                     <div class="col-span-2">
@@ -971,6 +987,30 @@ const removeContactLink = (idx: number) => {
           <span class="text-sm font-mono text-slate-600 w-8">%</span>
         </div>
         <p class="text-[10px] text-slate-400 mt-1">{{ t('fontScaleHint') }}</p>
+
+        <label class="block text-xs font-bold text-slate-500 mb-2 mt-4">{{ t('fontFamily') }}</label>
+        <select v-model="data.fontFamily"
+          class="w-full text-xs border border-slate-200 rounded p-1.5 focus:border-[#01a3a4] outline-none bg-white">
+          <option value="Inter" style="font-family: 'Inter', sans-serif;">Inter</option>
+          <option value="Roboto" style="font-family: 'Roboto', sans-serif;">Roboto</option>
+          <option value="Lato" style="font-family: 'Lato', sans-serif;">Lato</option>
+          <option value="'Open Sans'" style="font-family: 'Open Sans', sans-serif;">Open Sans</option>
+          <option value="Merriweather" style="font-family: 'Merriweather', serif;">Merriweather</option>
+          <option value="'Source Serif 4'" style="font-family: 'Source Serif 4', serif;">Source Serif 4</option>
+          <option value="'Playfair Display'" style="font-family: 'Playfair Display', serif;">Playfair Display</option>
+          <option value="'Times New Roman'" style="font-family: 'Times New Roman', serif;">Times New Roman</option>
+        </select>
+
+        <label class="block text-xs font-bold text-slate-500 mb-2 mt-3">{{ t('fontFamilyZh') }}</label>
+        <select v-model="data.fontFamilyZh"
+          class="w-full text-xs border border-slate-200 rounded p-1.5 focus:border-[#01a3a4] outline-none bg-white">
+          <option value="'Noto Sans SC'" style="font-family: 'Noto Sans SC', sans-serif;">Noto Sans SC（思源黑体）</option>
+          <option value="'Noto Serif SC'" style="font-family: 'Noto Serif SC', serif;">Noto Serif SC（思源宋体）</option>
+          <option value="'Microsoft YaHei'" style="font-family: 'Microsoft YaHei', sans-serif;">微软雅黑</option>
+          <option value="'SimSun'" style="font-family: 'SimSun', serif;">宋体（SimSun）</option>
+          <option value="'PingFang SC'" style="font-family: 'PingFang SC', sans-serif;">苹方（PingFang SC）</option>
+        </select>
+        <p class="text-[10px] text-slate-400 mt-1">{{ t('fontFamilyHint') }}</p>
       </div>
 
       <div class="mb-6 border border-slate-200 rounded-lg bg-white shadow-sm p-4" v-if="visibleSectionOrder.length > 0">

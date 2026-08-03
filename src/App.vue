@@ -265,7 +265,7 @@ const handleImportJson = (event: Event) => {
 @media print {
   @page {
     /* 将物理页边距交还给浏览器控制，解决分页后中间页面无边距的问题 */
-    margin: 20mm 25mm !important;
+    margin: var(--print-margin-v) var(--print-margin-h) !important;
   }
 
   * {

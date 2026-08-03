@@ -109,6 +109,8 @@ export interface ContactLink {
 export interface CvData {
   themeColor: string;
   fontScale?: number; // 字体缩放比例，默认 1.0
+  fontFamily?: string; // 西文/拉丁字体（Google Fonts 或系统字体），默认 Inter
+  fontFamilyZh?: string; // 中文字体（Google Fonts 或系统字体），默认 Noto Sans SC
   personal: {
     name: string;
     nameZh?: string;

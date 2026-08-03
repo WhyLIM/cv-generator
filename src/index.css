@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/* A4 打印页边距：预览内边距与打印页边距共用同一变量，保证预览/打印一致 */
+:root {
+  --print-margin-v: 20mm;
+  --print-margin-h: 25mm;
+}
+
 @theme {
   --color-primary: var(--theme-color, #01a3a4);
   --font-serif: "Crimson Text", Georgia, Cambria, "Times New Roman", Times, serif;
@@ -15,7 +21,7 @@
 
 @media print {
   @page {
-    margin: 0mm;
+    margin: var(--print-margin-v) var(--print-margin-h);
     size: A4 portrait;
   }
   
