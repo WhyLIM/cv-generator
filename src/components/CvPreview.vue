@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
-import type { CvData, Author } from '../types';
+import type { CvData, Author, Funding } from '../types';
 import { useLocale } from '../composables/useLocale';
 
 const { t } = useLocale();
@@ -52,16 +52,29 @@ const visibleSectionIds = computed(() => {
   });
 });
 
-// academic 的子块拆分（与模板渲染分组一致：四个独立子模块，受可见性控制）
-const academicSubblocks = computed(() => {
+// academic 的子块拆分（与模板渲染分组一致：四个独立子模块，受可见性控制）；
+// society/reviews/contributions 各为一个整块单元（idx=-1），fundings 每条目一个单元（idx 为条目序号），
+// 使基金条目间可跨页流动而非整块搬移
+type AcademicSub = 'society' | 'reviews' | 'contributions' | 'fundings';
+
+const academicUnits = computed<{ sub: AcademicSub; idx: number }[]>(() => {
   const subs = props.data.sectionSettings?.academic?.subsections;
-  const parts: ('society' | 'reviews' | 'contributions' | 'fundings')[] = [];
-  if (props.data.societyServices.length > 0 && subs?.society?.visible !== false) parts.push('society');
-  if (props.data.reviews.length > 0 && subs?.reviews?.visible !== false) parts.push('reviews');
-  if (props.data.contributions.length > 0 && subs?.contributions?.visible !== false) parts.push('contributions');
-  if (props.data.fundings.length > 0 && subs?.fundings?.visible !== false) parts.push('fundings');
-  return parts;
+  const out: { sub: AcademicSub; idx: number }[] = [];
+  if (props.data.societyServices.length > 0 && subs?.society?.visible !== false) out.push({ sub: 'society', idx: -1 });
+  if (props.data.reviews.length > 0 && subs?.reviews?.visible !== false) out.push({ sub: 'reviews', idx: -1 });
+  if (props.data.contributions.length > 0 && subs?.contributions?.visible !== false) out.push({ sub: 'contributions', idx: -1 });
+  if (props.data.fundings.length > 0 && subs?.fundings?.visible !== false) {
+    for (let i = 0; i < props.data.fundings.length; i++) out.push({ sub: 'fundings', idx: i });
+  }
+  return out;
 });
+
+// part 序号 → academic 单元（模板渲染用）
+const academicUnitAt = (part: number): { sub: AcademicSub; idx: number } =>
+  academicUnits.value[part] || { sub: 'society', idx: -1 };
+
+// fundings 单元对应的条目
+const fundingAt = (part: number): Funding => props.data.fundings[academicUnitAt(part).idx];
 
 // 各 section 的条目数量
 const itemCount = (secId: string): number => {
@@ -70,7 +83,7 @@ const itemCount = (secId: string): number => {
   if (secId === 'skills') return props.data.skills.length;
   if (secId === 'articles') return props.data.articles.length;
   if (secId === 'conferences') return props.data.conferences.length;
-  if (secId === 'academic') return academicSubblocks.value.length;
+  if (secId === 'academic') return academicUnits.value.length;
   if (secId === 'awards') return props.data.awards.length;
   if (secId.startsWith('custom-')) {
     const cs = props.data.customSections?.find(c => 'custom-' + c.id === secId);
@@ -367,7 +380,7 @@ onBeforeUnmount(() => {
             <template
               v-for="link in (data.personal.contactLinks || []).filter(l => l.visible !== false && (l.label || l.url))"
               :key="link.id">
-              <p class="flex gap-1.5 items-center justify-end">
+              <p class="flex gap-1 items-center justify-end">
                 <i :class="(link.icon || 'fa-solid fa-link') + ' text-[0.7143em] w-3 text-center'"></i>
                 <a v-if="link.url" :href="link.url" target="_blank" rel="noopener" class="hover:underline">{{ link.label
                   || link.url.replace(/^(tel:|mailto:|https?:\/\/)/, '') }}</a>
@@ -392,11 +405,11 @@ onBeforeUnmount(() => {
                 <div class="flex justify-between items-baseline mb-1">
                   <p class="text-[0.8571em] text-slate-600 leading-snug">
                     <span class="font-semibold text-slate-900 text-[1em]">{{ data.education[unit.part].institution
-                    }}</span><br />
+                      }}</span><br />
                     {{ data.education[unit.part].degree }}, {{ data.education[unit.part].location }}
                   </p>
                   <span class="text-[0.7857em] text-slate-500 whitespace-nowrap">{{ data.education[unit.part].startDate
-                  }} – {{ data.education[unit.part].endDate }}</span>
+                    }} – {{ data.education[unit.part].endDate }}</span>
                 </div>
               </div>
             </div>
@@ -415,7 +428,7 @@ onBeforeUnmount(() => {
                 <div class="flex justify-between items-baseline mb-1">
                   <h3 class="text-[1em] font-bold text-slate-900">{{ data.employment[unit.part].role }}</h3>
                   <span class="text-[0.7857em] text-slate-500 whitespace-nowrap">{{ data.employment[unit.part].startDate
-                  }} – {{ data.employment[unit.part].endDate }}</span>
+                    }} – {{ data.employment[unit.part].endDate }}</span>
                 </div>
                 <p class="text-[0.8571em] text-slate-600">
                   {{ data.employment[unit.part].institution }}, {{ data.employment[unit.part].location }}
@@ -480,15 +493,15 @@ onBeforeUnmount(() => {
                         v-if="data.articles[unit.part].year">{{ data.articles[unit.part].year }}.</template>
                       <template v-if="data.articles[unit.part].volumeAndIssue">{{
                         data.articles[unit.part].volumeAndIssue }}.</template>
+                      <span v-if="data.articles[unit.part].doi"
+                        class="text-[0.7857em] text-slate-500 ml-1 break-all">
+                        DOI: <a :href="'https://doi.org/' + data.articles[unit.part].doi" target="_blank" rel="noopener"
+                          class="hover:underline">{{ data.articles[unit.part].doi }}</a>
+                      </span>
                       <span v-if="data.articles[unit.part].impactFactor > 0"
                         class="inline-block ml-1 px-1.5 py-0.5 text-[0.7143em] font-bold rounded"
                         style="color: var(--theme-color); background-color: color-mix(in srgb, var(--theme-color) 12%, transparent);">
                         IF: {{ data.articles[unit.part].impactFactor.toFixed(1) }}
-                      </span>
-                      <span v-if="data.articles[unit.part].doi"
-                        class="text-[0.7857em] text-slate-500 block mt-0.5 break-all">
-                        DOI: <a :href="'https://doi.org/' + data.articles[unit.part].doi" target="_blank" rel="noopener"
-                          class="hover:underline">{{ data.articles[unit.part].doi }}</a>
                       </span>
                     </p>
                   </div>
@@ -531,7 +544,7 @@ onBeforeUnmount(() => {
               </h2>
               <div class="pl-1">
                 <!-- 学术团体 -->
-                <template v-if="academicSubblocks[unit.part] === 'society'">
+                <template v-if="academicUnitAt(unit.part).sub === 'society'">
                   <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
                     data.sectionSettings?.academic?.subsections?.society?.title || 'Societies and Associations' }}</h3>
                   <div v-for="item in data.societyServices" :key="item.id" class="mb-2">
@@ -557,7 +570,7 @@ onBeforeUnmount(() => {
                   </div>
                 </template>
                 <!-- 审稿 -->
-                <template v-else-if="academicSubblocks[unit.part] === 'reviews'">
+                <template v-else-if="academicUnitAt(unit.part).sub === 'reviews'">
                   <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
                     data.sectionSettings?.academic?.subsections?.reviews?.title || 'Research Services' }}</h3>
                   <div v-for="item in data.reviews" :key="item.id" class="mb-2">
@@ -583,7 +596,7 @@ onBeforeUnmount(() => {
                   </div>
                 </template>
                 <!-- 学术贡献 -->
-                <template v-else-if="academicSubblocks[unit.part] === 'contributions'">
+                <template v-else-if="academicUnitAt(unit.part).sub === 'contributions'">
                   <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
                     data.sectionSettings?.academic?.subsections?.contributions?.title || 'Academic Contributions' }}
                   </h3>
@@ -609,17 +622,17 @@ onBeforeUnmount(() => {
                     </ul>
                   </div>
                 </template>
-                <!-- 基金项目 -->
-                <template v-else-if="academicSubblocks[unit.part] === 'fundings'">
-                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
-                    data.sectionSettings?.academic?.subsections?.fundings?.title || 'Fundings' }}</h3>
-                  <ul class="space-y-2">
-                    <li v-for="fd in data.fundings" :key="fd.id" class="text-[0.8571em] text-slate-600 leading-relaxed">
-                      <strong>{{ fd.source }}</strong>, Grant No. <strong>{{ fd.grantNo }}</strong> ({{ fd.period
-                      }})<br />
-                      <span class="italic">{{ fd.title }}</span> — <strong>{{ fd.role }}</strong>
-                    </li>
-                  </ul>
+                <!-- 基金项目（条目级分页单元：每条目独立，可跨页流动；子模块标题跟随第一个条目） -->
+                <template v-else-if="academicUnitAt(unit.part).sub === 'fundings'">
+                  <h3 v-if="academicUnitAt(unit.part).idx === 0" class="font-bold text-slate-900 text-[0.8571em] mb-1">
+                    {{
+                      data.sectionSettings?.academic?.subsections?.fundings?.title || 'Research Fundings' }}</h3>
+                  <p class="text-[0.8571em] text-slate-600 leading-relaxed">
+                    <strong>{{ fundingAt(unit.part).source }}</strong>, Grant No. <strong>{{
+                      fundingAt(unit.part).grantNo }}</strong> ({{ fundingAt(unit.part).period }})<br />
+                    <span class="italic">{{ fundingAt(unit.part).title }}</span> — <strong>{{
+                      fundingAt(unit.part).role }}</strong>
+                  </p>
                 </template>
               </div>
             </div>
@@ -638,7 +651,7 @@ onBeforeUnmount(() => {
                 <div class="flex justify-between items-baseline mb-0.5">
                   <h3 class="text-[1em] font-bold text-slate-900">{{ data.awards[unit.part].title }}</h3>
                   <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ data.awards[unit.part].dateStr
-                  }}</span>
+                    }}</span>
                 </div>
                 <p class="text-[0.8571em] text-slate-600 leading-snug">
                   <strong style="color: var(--theme-color)">{{ data.awards[unit.part].issuer }}</strong> — {{
@@ -670,7 +683,7 @@ onBeforeUnmount(() => {
                     <div class="flex justify-between items-baseline mb-0.5">
                       <h3 class="text-[1em] font-bold text-slate-900">{{ customItem(unit).title }}</h3>
                       <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ customItem(unit).dateStr
-                      }}</span>
+                        }}</span>
                     </div>
                     <p v-if="customItem(unit).subtitle || customItem(unit).location"
                       class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
