@@ -9,8 +9,14 @@ const translations = { en, zh };
 const currentLocale = ref<Locale>('en');
 
 export function useLocale() {
-  const t = (key: TranslationKey): string => {
-    return translations[currentLocale.value][key] || translations.en[key] || key;
+  const t = (key: TranslationKey, params?: Record<string, string | number>): string => {
+    let str = translations[currentLocale.value][key] || translations.en[key] || key;
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        str = str.replace(`{${k}}`, String(v));
+      });
+    }
+    return str;
   };
 
   const locale = computed(() => currentLocale.value);

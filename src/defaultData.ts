@@ -19,7 +19,7 @@ export const defaultData: CvData = {
     documentTitle: 'Curriculum Vitae',
     showDocumentTitle: true,
     footerTitle: 'Curriculum Vitae',
-    showFooterTitle: true,
+    showFooterTitle: false,
     lastModifiedText: 'Last modified: 2026.04.23',
     showLastModified: true
   },
@@ -102,7 +102,7 @@ export const defaultData: CvData = {
       year: '2024',
       volumeAndIssue: '9(1)',
       doi: '10.1136/bmjophth-2024-001915',
-      impactFactor: 2.0
+      impactFactor: 2.7
     },
     {
       id: 'ar2',
@@ -123,7 +123,7 @@ export const defaultData: CvData = {
       year: '2024',
       volumeAndIssue: 'e155',
       doi: '10.1002/imt2.155',
-      impactFactor: 23.7
+      impactFactor: 44.4
     },
     {
       id: 'ar3',
@@ -150,7 +150,7 @@ export const defaultData: CvData = {
       volumeAndIssue: '22(1)',
       pages: '1098',
       doi: '10.1186/s12967-024-05868-3',
-      impactFactor: 6.1
+      impactFactor: 9.7
     },
     {
       id: 'ar4',
@@ -173,7 +173,7 @@ export const defaultData: CvData = {
       volumeAndIssue: '17(1)',
       pages: '40',
       doi: '10.1186/s13040-024-00394-w',
-      impactFactor: 4.0
+      impactFactor: 7.9
     },
     {
       id: 'ar5',
@@ -201,7 +201,7 @@ export const defaultData: CvData = {
       volumeAndIssue: '10(1)',
       pages: '36',
       doi: '10.1038/s41514-024-00162-4',
-      impactFactor: 4.1
+      impactFactor: 13.0
     },
     {
       id: 'ar6',

@@ -51,7 +51,7 @@ const handleSettingsChange = () => {
 </script>
 
 <template>
-  <div class="mb-8 border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm">
+  <div class="mb-3 border border-slate-200 rounded-lg bg-white overflow-hidden shadow-sm">
     <div class="px-3 py-2 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row md:justify-between md:items-center gap-2">
       <div v-if="settings" class="flex items-center gap-2 flex-1">
          <input type="checkbox" v-model="settings.visible" @change="handleSettingsChange" title="Toggle section visibility" class="accent-[#01a3a4] cursor-pointer w-3.5 h-3.5 rounded shrink-0">

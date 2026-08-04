@@ -21,30 +21,50 @@
 
 @media print {
   @page {
-    margin: var(--print-margin-v) var(--print-margin-h);
+    /* 页边距由每页 .page 的 padding 提供（预览/打印共用 --print-margin-*） */
+    margin: 0;
     size: A4 portrait;
   }
-  
+
   body {
     background: white;
     margin: 0;
     padding: 0;
   }
-  
+
   .no-print {
     display: none !important;
   }
-  
+
   .print-only {
     display: block !important;
   }
-  
-  .print-container {
-    width: 100% !important;
+
+  /* 每页固定 A4 尺寸，页间分页 */
+  .cv-pages {
+    display: block !important;
+  }
+
+  /* 横向排列时打印仍按纵向逐页输出 */
+  .pages-strip {
+    display: block !important;
+  }
+
+  .page {
+    width: 210mm !important;
+    height: 297mm !important;
     max-width: none !important;
     margin: 0 !important;
-    padding: 0 !important;
-    box-shadow: none !important;
+    box-sizing: border-box !important;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  /* 最后一页不强制分页（:last-child 因 .no-print 兄弟元素永不匹配，改用模板类 .page-last） */
+  .page:last-child,
+  .page-last {
+    break-after: auto;
+    page-break-after: auto;
   }
 
   a {

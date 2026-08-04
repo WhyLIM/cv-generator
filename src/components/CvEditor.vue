@@ -94,7 +94,7 @@ const data = computed({
     }
 
     if (val.personal && val.personal.showFooterTitle === undefined) {
-      val.personal.showFooterTitle = true;
+      val.personal.showFooterTitle = false;
       val.personal.footerTitle = 'Curriculum Vitae';
       val.personal.showLastModified = true;
       const lastModPrefix = isZh.value ? '最后修改日期：' : 'Last modified: ';
@@ -309,7 +309,7 @@ const removeContactLink = (idx: number) => {
       </EditorSection>
 
       <!-- Contact links section -->
-      <div class="mt-6">
+      <div class="mt-2">
         <EditorSection :title="t('contactInfo')" :data="data.personal" @update="data.personal = $event">
           <p class="text-[10px] text-slate-500 -mt-1 mb-3 leading-relaxed">{{ t('contactInfoHint') }}</p>
           <div class="space-y-2">
@@ -383,7 +383,7 @@ const removeContactLink = (idx: number) => {
         </EditorSection>
       </div>
 
-      <div class="mt-6">
+      <div class="mt-2">
         <EditorSection :title="t('profilePhoto')" :data="data.personal" @update="data.personal = $event">
           <div class="flex flex-col gap-4">
             <label class="flex items-center gap-2 cursor-pointer">
@@ -412,14 +412,37 @@ const removeContactLink = (idx: number) => {
         </EditorSection>
       </div>
 
-      <div class="mt-6">
+      <div class="mt-2">
         <EditorSection :title="t('footerContent')" :data="data.personal" @update="data.personal = $event">
-          <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('footerTitle') }}</label><input
-                v-model="data.personal.footerTitle" :disabled="!data.personal.showFooterTitle"
-                class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-3 items-start">
+              <div>
+                <label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('lastModifiedText') }}</label>
+                <div class="flex gap-1">
+                  <input v-model="data.personal.lastModifiedText" :disabled="!data.personal.showLastModified"
+                    class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
+                  <button
+                    @click="data.personal.lastModifiedText = `${t('lastModified')}${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`"
+                    :disabled="!data.personal.showLastModified" :title="t('syncToToday')"
+                    class="px-2 border border-slate-200 rounded bg-white text-slate-500 disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed hover:bg-slate-50 hover:text-[#01a3a4] hover:border-[#01a3a4]/30 transition-colors">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                  </button>
+                </div>
+              </div>
+              <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showLastModified') }}</label>
+                <div class="h-[34px] flex items-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" v-model="data.personal.showLastModified" class="sr-only peer">
+                    <div
+                      class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01a3a4]">
+                    </div>
+                    <span class="ml-2 text-xs text-slate-600 font-medium whitespace-nowrap">{{
+                      data.personal.showLastModified ? t('enabled') : t('disabled') }}</span>
+                  </label>
+                </div>
+              </div>
             </div>
-            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showFooterTitle') }}</label>
+            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showPageNum') }}</label>
               <div class="h-[34px] flex items-center">
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" v-model="data.personal.showFooterTitle" class="sr-only peer">
@@ -428,31 +451,6 @@ const removeContactLink = (idx: number) => {
                   </div>
                   <span class="ml-2 text-xs text-slate-600 font-medium whitespace-nowrap">{{
                     data.personal.showFooterTitle ? t('enabled') : t('disabled') }}</span>
-                </label>
-              </div>
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('lastModifiedText') }}</label>
-              <div class="flex gap-1">
-                <input v-model="data.personal.lastModifiedText" :disabled="!data.personal.showLastModified"
-                  class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
-                <button
-                  @click="data.personal.lastModifiedText = `${t('lastModified')}${new Date().toISOString().split('T')[0].replace(/-/g, '.')}`"
-                  :disabled="!data.personal.showLastModified" :title="t('syncToToday')"
-                  class="px-2 border border-slate-200 rounded bg-white text-slate-500 disabled:bg-slate-100 disabled:text-slate-300 disabled:cursor-not-allowed hover:bg-slate-50 hover:text-[#01a3a4] hover:border-[#01a3a4]/30 transition-colors">
-                  <i class="fa-solid fa-clock-rotate-left"></i>
-                </button>
-              </div>
-            </div>
-            <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showLastModified') }}</label>
-              <div class="h-[34px] flex items-center">
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" v-model="data.personal.showLastModified" class="sr-only peer">
-                  <div
-                    class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#01a3a4]">
-                  </div>
-                  <span class="ml-2 text-xs text-slate-600 font-medium whitespace-nowrap">{{
-                    data.personal.showLastModified ? t('enabled') : t('disabled') }}</span>
                 </label>
               </div>
             </div>

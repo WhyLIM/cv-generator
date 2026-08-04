@@ -45,6 +45,7 @@ export const zh = {
   displayPhoto: '在简历中显示头像',
   footerTitle: '页脚标题',
   showFooterTitle: '显示页脚标题',
+  showPageNum: '显示页码',
   lastModifiedText: '最后修改日期',
   showLastModified: '显示最后修改',
   footerContent: '页脚内容',
@@ -165,6 +166,8 @@ export const zh = {
   visualDesign: '可视化设计',
   fontAwesomeLoaded: 'FontAwesome: 已加载',
   vueLoaded: 'Vue v3',
+  previewScaleHint: '预览缩放（Ctrl+滚轮）',
+  reset: '重置',
   enabled: '已启用',
   disabled: '已禁用',
 
@@ -187,6 +190,10 @@ export const zh = {
   // Footer
   curriculumVitae: '简历',
   lastModified: '最后修改日期：',
+  page: '第 {n} 页',
+  totalPages: '共 {n} 页',
+  verticalLayout: '纵向排列',
+  horizontalLayout: '横向排列',
 
   // 联系方式
   contactInfo: '联系方式',

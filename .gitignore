@@ -7,3 +7,6 @@ test/
 *.log
 .env*
 !.env.example
+
+# 调试用 headless Edge 配置目录（CDP 远程调试时生成）
+_edge_profile/

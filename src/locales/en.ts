@@ -45,6 +45,7 @@ export const en = {
   displayPhoto: 'Display Profile Photo on CV',
   footerTitle: 'Footer Title',
   showFooterTitle: 'Show Footer Title',
+  showPageNum: 'Show Page Number',
   lastModifiedText: 'Last Modified Text',
   showLastModified: 'Show Last Modified',
   footerContent: 'Footer Content',
@@ -165,6 +166,8 @@ export const en = {
   visualDesign: 'Visual Design',
   fontAwesomeLoaded: 'FontAwesome: Loaded',
   vueLoaded: 'Vue v3',
+  previewScaleHint: 'Preview zoom (Ctrl+wheel)',
+  reset: 'Reset',
   enabled: 'Enabled',
   disabled: 'Disabled',
 
@@ -187,6 +190,10 @@ export const en = {
   // Footer
   curriculumVitae: 'Curriculum Vitae',
   lastModified: 'Last modified: ',
+  page: 'Page {n}',
+  totalPages: 'Total: {n} pages',
+  verticalLayout: 'Vertical layout',
+  horizontalLayout: 'Horizontal layout',
 
   // Contact links
   contactInfo: 'Contact Info',

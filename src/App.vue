@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import CvPreview from './components/CvPreview.vue';
 import CvEditor from './components/CvEditor.vue';
 import { defaultData } from './defaultData';
@@ -10,7 +10,25 @@ const cvData = ref<CvData>(defaultData);
 const activeTab = ref('personal');
 const lastSaved = ref<Date | null>(null);
 const showSaveToast = ref(false);
+// 预览显示缩放（仅影响屏幕显示，不影响 PDF；状态栏滑块与 Ctrl+滚轮共用）
+const previewScale = ref(1);
+// 预览 wrapper 的原始高度（未缩放），用于补偿外层占位容器高度，让滚动区匹配缩放后的视觉尺寸
+const previewZoomRef = ref<HTMLElement | null>(null);
+const previewOuterH = ref(0);
+let resizeObserver: ResizeObserver | null = null;
+const updateOuterH = () => {
+  if (previewZoomRef.value) previewOuterH.value = previewZoomRef.value.offsetHeight * previewScale.value;
+};
 const { t, locale, toggleLocale, initLocale } = useLocale();
+
+// Ctrl+滚轮缩放预览（0.5-2.0，步进 0.1）
+const handleWheel = (e: WheelEvent) => {
+  if (!e.ctrlKey) return;
+  e.preventDefault();
+  const step = e.deltaY < 0 ? 0.1 : -0.1;
+  const next = Math.round((previewScale.value + step) * 10) / 10;
+  previewScale.value = Math.min(2, Math.max(0.5, next));
+};
 
 // Initialize locale on mount
 onMounted(() => {
@@ -25,10 +43,21 @@ onMounted(() => {
     }
   }
   startAutoSave();
+  // 监听预览 wrapper 尺寸变化（分页变化、数据变化都会触发），同步外层占位高度
+  nextTick(() => {
+    if (previewZoomRef.value) {
+      resizeObserver = new ResizeObserver(() => updateOuterH());
+      resizeObserver.observe(previewZoomRef.value);
+      updateOuterH();
+    }
+  });
 });
+
+watch(previewScale, () => updateOuterH());
 
 onUnmounted(() => {
   if (autoSaveInterval) clearInterval(autoSaveInterval);
+  if (resizeObserver) resizeObserver.disconnect();
 });
 
 let autoSaveInterval: number | null = null;
@@ -211,9 +240,16 @@ const handleImportJson = (event: Event) => {
 
       <!-- Preview Pane -->
       <section
-        class="flex-1 bg-slate-200 py-4 md:py-8 overflow-y-auto print:overflow-visible print:w-full print:p-0 print:block custom-scrollbar flex flex-col items-center print:bg-white print:!absolute print:!top-0 print:!left-0 print:z-50">
-        <div class="print:w-full print:!m-0 print:block w-[210mm]">
-          <CvPreview :data="cvData" class="shadow-2xl print:shadow-none bg-white w-full print:w-full" />
+        class="flex-1 bg-slate-200 py-4 md:py-8 overflow-auto print:overflow-visible print:w-full print:p-0 print:block custom-scrollbar flex flex-col items-center print:bg-white print:!absolute print:!top-0 print:!left-0 print:z-50"
+        @wheel="handleWheel">
+        <!-- w-full：横向排列时纸面超出窗口宽度，由本窗口（预览区）的滚动条横向滚动 -->
+        <div class="print:w-full print:!m-0 print:block w-full preview-zoom-outer"
+          :style="{ height: previewOuterH + 'px' }">
+          <div ref="previewZoomRef" class="preview-zoom-wrapper"
+            :style="{ transform: `scale(${previewScale})`, transformOrigin: 'top center' }">
+            <!-- 注意：不要在此容器加 bg-white，否则页间空隙被白色填充，多张纸视觉上连成一张 -->
+            <CvPreview :data="cvData" class="w-full print:w-full" />
+          </div>
         </div>
       </section>
 
@@ -234,9 +270,18 @@ const handleImportJson = (event: Event) => {
         <span>Mode: <span class="font-medium italic" style="color: #01a3a4">{{ t('visualDesign') }}</span></span>
         <span>{{ t('autoSave') }}: <span class="font-medium" style="color: #01a3a4">{{ t('active') }}</span></span>
       </div>
-      <div class="flex gap-4">
-        <span>{{ t('fontAwesomeLoaded') }}</span>
-        <span>{{ t('vueLoaded') }}</span>
+      <!-- 预览缩放控件（仅屏幕显示，不影响 PDF） -->
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-magnifying-glass-minus text-slate-400"></i>
+        <input type="range" v-model.number="previewScale" min="0.5" max="2" step="0.1"
+          class="w-28 accent-[#01a3a4] cursor-pointer"
+          :title="t('previewScaleHint')">
+        <i class="fa-solid fa-magnifying-glass-plus text-slate-400"></i>
+        <span class="font-mono text-slate-600 w-9 text-right">{{ Math.round(previewScale * 100) }}%</span>
+        <button @click="previewScale = 1" :title="t('reset')"
+          class="ml-1 px-1.5 py-0.5 text-[10px] rounded border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-[#01a3a4] hover:border-[#01a3a4]/30 transition-colors">
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
       </div>
     </footer>
   </div>
@@ -246,6 +291,7 @@ const handleImportJson = (event: Event) => {
 /* Add a custom scrollbar for the preview pane to make it look nicer */
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -264,8 +310,8 @@ const handleImportJson = (event: Event) => {
 /* Ensure background printing works */
 @media print {
   @page {
-    /* 将物理页边距交还给浏览器控制，解决分页后中间页面无边距的问题 */
-    margin: var(--print-margin-v) var(--print-margin-h) !important;
+    /* 页边距由每页 .page 的 padding 提供（见 index.css） */
+    margin: 0 !important;
   }
 
   * {
@@ -288,18 +334,19 @@ const handleImportJson = (event: Event) => {
     box-sizing: border-box !important;
   }
 
-  /* 容器去掉 padding，以免和 @page 的边距在第一页和最后一页发生双重叠加 */
-  .print-container {
-    padding: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    /* 打印时应用字体缩放 */
-    zoom: var(--font-scale, 1) !important;
+  /* 字体缩放由 CvPreview 的 pageCss 内联 zoom + padding 补偿处理，
+     不在此重复声明 .page { zoom }，否则会与内联 zoom 叠加导致打印内容在 A4 内再次缩小 */
+
+  /* 预览显示缩放仅用于屏幕，打印时强制重置 transform，避免影响 PDF 输出 */
+  .preview-zoom-wrapper {
+    transform: none !important;
+  }
+  .preview-zoom-outer {
+    height: auto !important;
   }
 
-  /* 增强分页控制 - 防止区域被分割到两页 */
-  section {
+  /* 增强分页控制 - 防止分页单元被分割到两页（条目级分页，与预览一致） */
+  .page-unit {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
     orphans: 10 !important;
@@ -316,8 +363,8 @@ const handleImportJson = (event: Event) => {
     widows: 10 !important;
   }
 
-  /* 确保区域内所有子元素也不会被分割 */
-  section>* {
+  /* 确保分页单元内所有子元素也不会被分割 */
+  .page-unit>* {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
