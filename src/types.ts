@@ -74,9 +74,21 @@ export interface Award {
   links: AwardLink[];
 }
 
+export interface SubsectionConfig {
+  title: string;
+  visible: boolean;
+}
+
 export interface SectionConfig {
   title: string;
   visible: boolean;
+  // ACADEMIC CONTRIBUTIONS 下的子模块配置（仅 academic section 使用）
+  subsections?: {
+    society?: SubsectionConfig;
+    reviews?: SubsectionConfig;
+    contributions?: SubsectionConfig;
+    fundings?: SubsectionConfig;
+  };
 }
 
 export interface CustomItem {
@@ -155,9 +167,9 @@ export interface CvData {
   skills: Skill[];
   articles: Article[];
   conferences: Conference[];
-  societyServices: string[];
-  reviews: string[];
-  contributions: string[];
+  societyServices: CustomItem[];
+  reviews: CustomItem[];
+  contributions: CustomItem[];
   fundings: Funding[];
   awards: Award[];
   customSections?: CustomSection[];

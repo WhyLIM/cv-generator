@@ -30,6 +30,11 @@ export const en = {
   uploadPhoto: 'Upload Photo',
   importBibtex: 'Import BibTeX',
   parseBibtex: 'Parse & Append',
+  loadSample: 'Sample',
+  loadSampleHint: 'Load built-in sample data (overwrites current data)',
+  loadSampleConfirm: 'This will load the built-in sample data and overwrite your current unsaved changes. Continue?',
+  dataOps: 'Data',
+  dataOpsHint: 'Import / Export / Sample',
 
   // Labels - Personal
   name: 'Name',
@@ -89,6 +94,7 @@ export const en = {
   bulletPointsHint: 'One per line',
   unorderedList: 'Unordered List',
   orderedList: 'Ordered List',
+  listType: 'List Type',
   awardTitle: 'Award Title',
   issuer: 'Issuer / Organizer',
   issuerOrganizer: 'Issuer / Organizer',
@@ -113,7 +119,7 @@ export const en = {
   societyServices: 'Society Services',
   reviews: 'Reviews',
   contributions: 'Contributions',
-  simpleListHint: 'These are simple lists of strings. To edit them easily (add, remove, change order), please switch to the JSON tab above.',
+  simpleListHint: 'Each entry is an item with title, subtitle, date, location, description and bullet points, same as custom sections. Click an entry to expand it for editing.',
   customSectionDescription: 'Custom sections allow you to create completely new resume blocks (e.g., Projects, Volunteering, Certificates) with custom titles and generic content structures.',
   addItemInto: 'Add Item into {section}',
   untitledItem: 'Untitled Item',

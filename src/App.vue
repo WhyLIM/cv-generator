@@ -5,7 +5,6 @@ import CvEditor from './components/CvEditor.vue';
 import { defaultData } from './defaultData';
 import type { CvData } from './types';
 import { useLocale } from './composables/useLocale';
-
 const cvData = ref<CvData>(defaultData);
 const activeTab = ref('personal');
 const lastSaved = ref<Date | null>(null);
@@ -43,6 +42,8 @@ onMounted(() => {
     }
   }
   startAutoSave();
+  // 点击外部关闭数据下拉菜单
+  document.addEventListener('click', closeDataMenu);
   // 监听预览 wrapper 尺寸变化（分页变化、数据变化都会触发），同步外层占位高度
   nextTick(() => {
     if (previewZoomRef.value) {
@@ -58,6 +59,7 @@ watch(previewScale, () => updateOuterH());
 onUnmounted(() => {
   if (autoSaveInterval) clearInterval(autoSaveInterval);
   if (resizeObserver) resizeObserver.disconnect();
+  document.removeEventListener('click', closeDataMenu);
 });
 
 let autoSaveInterval: number | null = null;
@@ -143,6 +145,25 @@ const handleImportJson = (event: Event) => {
   reader.readAsText(file);
 };
 
+// 加载示例数据（覆盖当前数据，需确认）
+const handleLoadSample = () => {
+  if (!confirm(t('loadSampleConfirm'))) return;
+  // 深拷贝避免默认数据对象被响应式修改污染
+  cvData.value = JSON.parse(JSON.stringify(defaultData));
+};
+
+// 数据操作下拉菜单
+const showDataMenu = ref(false);
+const toggleDataMenu = () => { showDataMenu.value = !showDataMenu.value; };
+const closeDataMenu = () => { showDataMenu.value = false; };
+const handleImportClick = () => {
+  closeDataMenu();
+  const input = document.getElementById('import-json') as HTMLInputElement | null;
+  input?.click();
+};
+const handleExportClick = () => { closeDataMenu(); handleExportJson(); };
+const handleSampleClick = () => { closeDataMenu(); handleLoadSample(); };
+
 </script>
 
 <template>
@@ -210,26 +231,45 @@ const handleImportJson = (event: Event) => {
       <!-- Editor Pane -->
       <aside
         class="w-[450px] md:w-[500px] min-w-[350px] border-r border-slate-200 bg-white flex flex-col z-10 shrink-0 no-print shadow-sm h-full relative">
-        <div class="h-14 border-b border-slate-200 bg-white flex justify-between items-center px-4 shrink-0">
-          <h2 class="text-sm font-bold text-slate-700 capitalize w-20"><i
+        <div class="h-14 border-b border-slate-200 bg-white flex justify-between items-center px-4 shrink-0 gap-3">
+          <h2 class="text-sm font-bold text-slate-700 capitalize min-w-0 truncate"><i
               class="fa-solid fa-pen-to-square text-[#01a3a4] mr-1.5 hidden sm:inline"></i> {{ activeTab }}</h2>
           <div class="flex items-center gap-2">
             <input type="file" id="import-json" accept=".json" class="hidden" @change="handleImportJson" />
-            <label for="import-json"
-              class="px-2 py-1.5 text-[11px] font-semibold text-slate-600 rounded bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm cursor-pointer whitespace-nowrap">
-              <i class="fa-solid fa-file-import mr-1"></i> <span class="hidden sm:inline">Import JSON</span>
-            </label>
-            <button @click="handleExportJson"
-              class="px-2 py-1.5 text-[11px] font-semibold text-slate-600 rounded bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm whitespace-nowrap">
-              <i class="fa-solid fa-file-export mr-1"></i> <span class="hidden sm:inline">Export JSON</span>
-            </button>
+            <!-- 数据操作下拉菜单（Import / Export / Sample） -->
+            <div class="relative">
+              <button @click.stop="toggleDataMenu"
+                class="px-2 py-1.5 text-[11px] font-semibold text-slate-600 rounded bg-slate-100 hover:bg-slate-200 transition-colors shadow-sm whitespace-nowrap flex items-center gap-1"
+                :class="{ 'bg-slate-200': showDataMenu }"
+                :title="t('dataOpsHint')">
+                <i class="fa-solid fa-database"></i> <span class="hidden sm:inline">{{ t('dataOps') }}</span>
+                <i class="fa-solid fa-chevron-down text-[8px] ml-0.5"></i>
+              </button>
+              <div v-if="showDataMenu"
+                class="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[140px] z-50">
+                <button @click.stop="handleImportClick"
+                  class="w-full text-left px-3 py-1.5 text-[11px] text-slate-600 hover:bg-slate-50 hover:text-[#01a3a4] flex items-center gap-2">
+                  <i class="fa-solid fa-file-import w-3"></i> {{ t('importJson') }}
+                </button>
+                <button @click.stop="handleExportClick"
+                  class="w-full text-left px-3 py-1.5 text-[11px] text-slate-600 hover:bg-slate-50 hover:text-[#01a3a4] flex items-center gap-2">
+                  <i class="fa-solid fa-file-export w-3"></i> {{ t('exportJson') }}
+                </button>
+                <div class="border-t border-slate-100 my-1"></div>
+                <button @click.stop="handleSampleClick"
+                  class="w-full text-left px-3 py-1.5 text-[11px] text-slate-600 hover:bg-slate-50 hover:text-[#01a3a4] flex items-center gap-2"
+                  :title="t('loadSampleHint')">
+                  <i class="fa-solid fa-flask-vial w-3"></i> {{ t('loadSample') }}
+                </button>
+              </div>
+            </div>
             <button @click="handlePrint"
               class="px-2 py-1.5 text-[11px] font-semibold text-white rounded bg-[#01a3a4] hover:bg-[#01a3a4]/90 transition-colors shadow-sm whitespace-nowrap border border-[#01a3a4]">
               <i class="fa-solid fa-file-pdf mr-1"></i> <span class="hidden sm:inline">PDF</span>
             </button>
             <button @click="handleSave"
               class="px-2 py-1.5 text-[11px] font-semibold text-white rounded bg-green-600 hover:bg-green-700 transition-colors shadow-sm whitespace-nowrap border border-green-600">
-              <i class="fa-solid fa-save mr-1"></i> <span class="hidden sm:inline">Save</span>
+              <i class="fa-solid fa-save mr-1"></i> <span class="hidden sm:inline">{{ t('save') }}</span>
             </button>
           </div>
         </div>

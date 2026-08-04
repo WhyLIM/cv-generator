@@ -52,12 +52,14 @@ const visibleSectionIds = computed(() => {
   });
 });
 
-// academic 的子块拆分（与模板渲染分组一致）
+// academic 的子块拆分（与模板渲染分组一致：四个独立子模块，受可见性控制）
 const academicSubblocks = computed(() => {
-  const parts: ('society' | 'research' | 'fundings')[] = [];
-  if (props.data.societyServices.length > 0) parts.push('society');
-  if (props.data.reviews.length > 0 || props.data.contributions.length > 0) parts.push('research');
-  if (props.data.fundings.length > 0) parts.push('fundings');
+  const subs = props.data.sectionSettings?.academic?.subsections;
+  const parts: ('society' | 'reviews' | 'contributions' | 'fundings')[] = [];
+  if (props.data.societyServices.length > 0 && subs?.society?.visible !== false) parts.push('society');
+  if (props.data.reviews.length > 0 && subs?.reviews?.visible !== false) parts.push('reviews');
+  if (props.data.contributions.length > 0 && subs?.contributions?.visible !== false) parts.push('contributions');
+  if (props.data.fundings.length > 0 && subs?.fundings?.visible !== false) parts.push('fundings');
   return parts;
 });
 
@@ -339,12 +341,9 @@ onBeforeUnmount(() => {
     <div class="pages-strip w-full flex gap-8"
       :class="layout === 'horizontal' ? 'flex-row flex-nowrap items-start justify-start px-4' : 'flex-col items-center'">
 
-      <div
-        v-for="(page, pi) in pages"
-        :key="pi"
+      <div v-for="(page, pi) in pages" :key="pi"
         class="page relative bg-white text-slate-800 w-[210mm] h-[297mm] shrink-0 block leading-relaxed overflow-hidden shadow-xl print:shadow-none"
-        :class="{ 'page-last': pi === pages.length - 1 }"
-        :style="pageCss">
+        :class="{ 'page-last': pi === pages.length - 1 }" :style="pageCss">
 
         <!-- PROFILE PHOTO (Floated Top-Right) -->
         <div v-if="pi === 0 && data.personal.showPhoto && data.personal.photoUrl"
@@ -357,7 +356,7 @@ onBeforeUnmount(() => {
           style="border-color: var(--theme-color);">
           <div class="pb-1">
             <h1 class="text-[2.1429em] font-bold text-slate-900 leading-none mb-2">
-              {{ data.personal.name }} <span v-if="data.personal.nameZh" class="font-sans ml-1 text-[1.7143em] font-semibold">({{
+              {{ data.personal.name }} <span v-if="data.personal.nameZh" class="font-sans ml-1 font-semibold">({{
                 data.personal.nameZh }})</span>
             </h1>
             <p v-if="data.personal.showDocumentTitle !== false" class="font-medium" style="color: var(--theme-color)">{{
@@ -365,10 +364,13 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="flex flex-col text-[0.7857em] text-slate-500 space-y-1 text-right pb-1">
-            <template v-for="link in (data.personal.contactLinks || []).filter(l => l.visible !== false && (l.label || l.url))" :key="link.id">
+            <template
+              v-for="link in (data.personal.contactLinks || []).filter(l => l.visible !== false && (l.label || l.url))"
+              :key="link.id">
               <p class="flex gap-1.5 items-center justify-end">
                 <i :class="(link.icon || 'fa-solid fa-link') + ' text-[0.7143em] w-3 text-center'"></i>
-                <a v-if="link.url" :href="link.url" target="_blank" rel="noopener" class="hover:underline">{{ link.label || link.url.replace(/^(tel:|mailto:|https?:\/\/)/, '') }}</a>
+                <a v-if="link.url" :href="link.url" target="_blank" rel="noopener" class="hover:underline">{{ link.label
+                  || link.url.replace(/^(tel:|mailto:|https?:\/\/)/, '') }}</a>
                 <span v-else>{{ link.label }}</span>
               </p>
             </template>
@@ -389,10 +391,12 @@ onBeforeUnmount(() => {
               <div class="pl-1">
                 <div class="flex justify-between items-baseline mb-1">
                   <p class="text-[0.8571em] text-slate-600 leading-snug">
-                    <span class="font-semibold text-slate-900 text-[1em]">{{ data.education[unit.part].institution }}</span><br />
+                    <span class="font-semibold text-slate-900 text-[1em]">{{ data.education[unit.part].institution
+                    }}</span><br />
                     {{ data.education[unit.part].degree }}, {{ data.education[unit.part].location }}
                   </p>
-                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap">{{ data.education[unit.part].startDate }} – {{ data.education[unit.part].endDate }}</span>
+                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap">{{ data.education[unit.part].startDate
+                  }} – {{ data.education[unit.part].endDate }}</span>
                 </div>
               </div>
             </div>
@@ -410,12 +414,14 @@ onBeforeUnmount(() => {
               <div class="pl-1">
                 <div class="flex justify-between items-baseline mb-1">
                   <h3 class="text-[1em] font-bold text-slate-900">{{ data.employment[unit.part].role }}</h3>
-                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap">{{ data.employment[unit.part].startDate }} – {{ data.employment[unit.part].endDate }}</span>
+                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap">{{ data.employment[unit.part].startDate
+                  }} – {{ data.employment[unit.part].endDate }}</span>
                 </div>
                 <p class="text-[0.8571em] text-slate-600">
                   {{ data.employment[unit.part].institution }}, {{ data.employment[unit.part].location }}
                 </p>
-                <p v-if="data.employment[unit.part].description" class="text-[0.8571em] text-slate-600 leading-relaxed mt-1">
+                <p v-if="data.employment[unit.part].description"
+                  class="text-[0.8571em] text-slate-600 leading-relaxed mt-1">
                   {{ data.employment[unit.part].description }}
                 </p>
               </div>
@@ -434,7 +440,8 @@ onBeforeUnmount(() => {
               <ul class="pl-1">
                 <li class="text-[0.8571em] text-slate-700 leading-relaxed">
                   <span class="font-semibold text-slate-900 pr-2 mr-2 border-r border-slate-300">
-                    <i v-if="data.skills[unit.part].icon" :class="data.skills[unit.part].icon" class="w-4 text-center mr-1 text-slate-500"></i>
+                    <i v-if="data.skills[unit.part].icon" :class="data.skills[unit.part].icon"
+                      class="w-4 text-center mr-1 text-slate-500"></i>
                     {{ data.skills[unit.part].category }}
                   </span>
                   <template v-for="(item, idx) in data.skills[unit.part].items" :key="idx">
@@ -460,7 +467,8 @@ onBeforeUnmount(() => {
                     <p class="text-[1em] text-slate-900 leading-snug">
                       <!-- Author list -->
                       <template v-for="(au, idx) in data.articles[unit.part].authors" :key="idx">
-                        <span :class="{ 'font-semibold underline decoration-2': au.isMe, 'decoration-[#01a3a4]': au.isMe }"
+                        <span
+                          :class="{ 'font-semibold underline decoration-2': au.isMe, 'decoration-[#01a3a4]': au.isMe }"
                           :style="au.isMe ? `text-decoration-color: var(--theme-color)` : ''">{{ au.name }}</span>
                         <sup v-if="au.isFirst">#</sup><sup v-if="au.isCorresponding">*</sup>
                         <span v-if="idx < data.articles[unit.part].authors.length - 1">, </span>
@@ -468,15 +476,19 @@ onBeforeUnmount(() => {
 
                       <!-- Title and Journal Details -->
                       <span class="text-slate-600 italic ml-1">"{{ data.articles[unit.part].title }}"</span>
-                      <span class="font-semibold ml-1">{{ data.articles[unit.part].journal }}</span> <template v-if="data.articles[unit.part].year">{{ data.articles[unit.part].year }}.</template>
-                      <template v-if="data.articles[unit.part].volumeAndIssue">{{ data.articles[unit.part].volumeAndIssue }}.</template>
+                      <span class="font-semibold ml-1">{{ data.articles[unit.part].journal }}</span> <template
+                        v-if="data.articles[unit.part].year">{{ data.articles[unit.part].year }}.</template>
+                      <template v-if="data.articles[unit.part].volumeAndIssue">{{
+                        data.articles[unit.part].volumeAndIssue }}.</template>
                       <span v-if="data.articles[unit.part].impactFactor > 0"
                         class="inline-block ml-1 px-1.5 py-0.5 text-[0.7143em] font-bold rounded"
                         style="color: var(--theme-color); background-color: color-mix(in srgb, var(--theme-color) 12%, transparent);">
                         IF: {{ data.articles[unit.part].impactFactor.toFixed(1) }}
                       </span>
-                      <span v-if="data.articles[unit.part].doi" class="text-[0.7857em] text-slate-500 block mt-0.5 break-all">
-                        DOI: <a :href="'https://doi.org/' + data.articles[unit.part].doi" target="_blank" rel="noopener" class="hover:underline">{{ data.articles[unit.part].doi }}</a>
+                      <span v-if="data.articles[unit.part].doi"
+                        class="text-[0.7857em] text-slate-500 block mt-0.5 break-all">
+                        DOI: <a :href="'https://doi.org/' + data.articles[unit.part].doi" target="_blank" rel="noopener"
+                          class="hover:underline">{{ data.articles[unit.part].doi }}</a>
                       </span>
                     </p>
                   </div>
@@ -498,9 +510,11 @@ onBeforeUnmount(() => {
                 <div class="flex justify-between items-baseline mb-1">
                   <div>
                     <h3 class="text-[1em] font-bold text-slate-900">{{ data.conferences[unit.part].name }}</h3>
-                    <p class="text-[0.8571em] text-slate-600">{{ data.conferences[unit.part].location }} — <strong>{{ data.conferences[unit.part].type }}</strong></p>
+                    <p class="text-[0.8571em] text-slate-600">{{ data.conferences[unit.part].location }} — <strong>{{
+                      data.conferences[unit.part].type }}</strong></p>
                   </div>
-                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ data.conferences[unit.part].dateStr }}</span>
+                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{
+                    data.conferences[unit.part].dateStr }}</span>
                 </div>
               </div>
             </div>
@@ -518,31 +532,91 @@ onBeforeUnmount(() => {
               <div class="pl-1">
                 <!-- 学术团体 -->
                 <template v-if="academicSubblocks[unit.part] === 'society'">
-                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">Societies and Associations</h3>
-                  <ul class="space-y-1">
-                    <li v-for="(ss, idx) in data.societyServices" :key="idx" class="text-[0.8571em] text-slate-600 leading-relaxed pl-[1em] -indent-[1em]">
-                      <span class="inline-block w-[1em]">•</span>{{ ss }}
-                    </li>
-                  </ul>
+                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
+                    data.sectionSettings?.academic?.subsections?.society?.title || 'Societies and Associations' }}</h3>
+                  <div v-for="item in data.societyServices" :key="item.id" class="mb-2">
+                    <div v-if="item.title" class="flex justify-between items-baseline mb-0.5">
+                      <h4 class="text-[0.9286em] font-bold text-slate-900">{{ item.title }}</h4>
+                      <span v-if="item.dateStr" class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{
+                        item.dateStr }}</span>
+                    </div>
+                    <p v-if="item.subtitle || item.location"
+                      class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
+                      {{ item.subtitle }}<span v-if="item.subtitle && item.location">, </span>{{ item.location }}
+                    </p>
+                    <p v-if="item.description" class="text-[0.8571em] text-slate-600 leading-snug mb-1 text-justify">
+                      {{ item.description }}</p>
+                    <ul v-if="item.bullets && item.bullets.length > 0" class="space-y-1 mt-1 list-none">
+                      <li v-for="(bullet, bIdx) in item.bullets" :key="bIdx"
+                        class="text-[0.8571em] text-slate-600 grid grid-cols-[1.5em_1fr] gap-0">
+                        <span class="text-center text-slate-500">{{ item.bulletListType === 'ordered' ? (bIdx + 1) + '.'
+                          : '•' }}</span>
+                        <span class="text-justify">{{ bullet }}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </template>
-                <!-- 审稿与学术贡献 -->
-                <template v-else-if="academicSubblocks[unit.part] === 'research'">
-                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">Research Services</h3>
-                  <ul class="space-y-1">
-                    <li v-for="(rv, idx) in data.reviews" :key="'rv' + idx" class="text-[0.8571em] text-slate-600 leading-relaxed pl-[1em] -indent-[1em]">
-                      <span class="inline-block w-[1em]">•</span>{{ rv }}
-                    </li>
-                    <li v-for="(ct, idx) in data.contributions" :key="'ct' + idx" class="text-[0.8571em] text-slate-600 leading-relaxed pl-[1em] -indent-[1em]">
-                      <span class="inline-block w-[1em]">•</span><span class="whitespace-normal" v-html="ct"></span>
-                    </li>
-                  </ul>
+                <!-- 审稿 -->
+                <template v-else-if="academicSubblocks[unit.part] === 'reviews'">
+                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
+                    data.sectionSettings?.academic?.subsections?.reviews?.title || 'Research Services' }}</h3>
+                  <div v-for="item in data.reviews" :key="item.id" class="mb-2">
+                    <div v-if="item.title" class="flex justify-between items-baseline mb-0.5">
+                      <h4 class="text-[0.9286em] font-bold text-slate-900">{{ item.title }}</h4>
+                      <span v-if="item.dateStr" class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{
+                        item.dateStr }}</span>
+                    </div>
+                    <p v-if="item.subtitle || item.location"
+                      class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
+                      {{ item.subtitle }}<span v-if="item.subtitle && item.location">, </span>{{ item.location }}
+                    </p>
+                    <p v-if="item.description" class="text-[0.8571em] text-slate-600 leading-snug mb-1 text-justify">
+                      {{ item.description }}</p>
+                    <ul v-if="item.bullets && item.bullets.length > 0" class="space-y-1 mt-1 list-none">
+                      <li v-for="(bullet, bIdx) in item.bullets" :key="bIdx"
+                        class="text-[0.8571em] text-slate-600 grid grid-cols-[1.5em_1fr] gap-0">
+                        <span class="text-center text-slate-500">{{ item.bulletListType === 'ordered' ? (bIdx + 1) + '.'
+                          : '•' }}</span>
+                        <span class="text-justify">{{ bullet }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </template>
+                <!-- 学术贡献 -->
+                <template v-else-if="academicSubblocks[unit.part] === 'contributions'">
+                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
+                    data.sectionSettings?.academic?.subsections?.contributions?.title || 'Academic Contributions' }}
+                  </h3>
+                  <div v-for="item in data.contributions" :key="item.id" class="mb-2">
+                    <div v-if="item.title" class="flex justify-between items-baseline mb-0.5">
+                      <h4 class="text-[0.9286em] font-bold text-slate-900">{{ item.title }}</h4>
+                      <span v-if="item.dateStr" class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{
+                        item.dateStr }}</span>
+                    </div>
+                    <p v-if="item.subtitle || item.location"
+                      class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
+                      {{ item.subtitle }}<span v-if="item.subtitle && item.location">, </span>{{ item.location }}
+                    </p>
+                    <p v-if="item.description" class="text-[0.8571em] text-slate-600 leading-snug mb-1 text-justify">
+                      {{ item.description }}</p>
+                    <ul v-if="item.bullets && item.bullets.length > 0" class="space-y-1 mt-1 list-none">
+                      <li v-for="(bullet, bIdx) in item.bullets" :key="bIdx"
+                        class="text-[0.8571em] text-slate-600 grid grid-cols-[1.5em_1fr] gap-0">
+                        <span class="text-center text-slate-500">{{ item.bulletListType === 'ordered' ? (bIdx + 1) + '.'
+                          : '•' }}</span>
+                        <span class="text-justify">{{ bullet }}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </template>
                 <!-- 基金项目 -->
                 <template v-else-if="academicSubblocks[unit.part] === 'fundings'">
-                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">Fundings</h3>
+                  <h3 class="font-bold text-slate-900 text-[0.8571em] mb-1">{{
+                    data.sectionSettings?.academic?.subsections?.fundings?.title || 'Fundings' }}</h3>
                   <ul class="space-y-2">
                     <li v-for="fd in data.fundings" :key="fd.id" class="text-[0.8571em] text-slate-600 leading-relaxed">
-                      <strong>{{ fd.source }}</strong>, Grant No. <strong>{{ fd.grantNo }}</strong> ({{ fd.period }})<br />
+                      <strong>{{ fd.source }}</strong>, Grant No. <strong>{{ fd.grantNo }}</strong> ({{ fd.period
+                      }})<br />
                       <span class="italic">{{ fd.title }}</span> — <strong>{{ fd.role }}</strong>
                     </li>
                   </ul>
@@ -563,13 +637,17 @@ onBeforeUnmount(() => {
               <div class="pl-1">
                 <div class="flex justify-between items-baseline mb-0.5">
                   <h3 class="text-[1em] font-bold text-slate-900">{{ data.awards[unit.part].title }}</h3>
-                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ data.awards[unit.part].dateStr }}</span>
+                  <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ data.awards[unit.part].dateStr
+                  }}</span>
                 </div>
                 <p class="text-[0.8571em] text-slate-600 leading-snug">
-                  <strong style="color: var(--theme-color)">{{ data.awards[unit.part].issuer }}</strong> — {{ data.awards[unit.part].description }}
-                  <span v-if="data.awards[unit.part].links && data.awards[unit.part].links.length > 0" class="inline-flex gap-2 ml-1">
+                  <strong style="color: var(--theme-color)">{{ data.awards[unit.part].issuer }}</strong> — {{
+                    data.awards[unit.part].description }}
+                  <span v-if="data.awards[unit.part].links && data.awards[unit.part].links.length > 0"
+                    class="inline-flex gap-2 ml-1">
                     <template v-for="(link, i) in data.awards[unit.part].links" :key="i">
-                      <a :href="link.url" target="_blank" rel="noopener" class="text-[0.7857em] underline decoration-dotted">{{ link.label }}</a>
+                      <a :href="link.url" target="_blank" rel="noopener"
+                        class="text-[0.7857em] underline decoration-dotted">{{ link.label }}</a>
                     </template>
                   </span>
                 </p>
@@ -584,25 +662,33 @@ onBeforeUnmount(() => {
               <h2 v-if="unit.part === 0 && unit.from === 0"
                 class="text-[1em] font-bold uppercase tracking-widest border-l-4 pl-3 mb-4 flex items-center gap-2"
                 style="color: var(--theme-color); border-color: var(--theme-color);">
-                {{ data.customSections?.find(c => 'custom-' + c.id === unit.secId)?.title || 'CUSTOM SECTION' }}
+                {{data.customSections?.find(c => 'custom-' + c.id === unit.secId)?.title || 'CUSTOM SECTION'}}
               </h2>
               <div class="pl-1">
                 <template v-if="customItem(unit)">
                   <template v-if="unit.from === 0">
                     <div class="flex justify-between items-baseline mb-0.5">
                       <h3 class="text-[1em] font-bold text-slate-900">{{ customItem(unit).title }}</h3>
-                      <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ customItem(unit).dateStr }}</span>
+                      <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ customItem(unit).dateStr
+                      }}</span>
                     </div>
-                    <p v-if="customItem(unit).subtitle || customItem(unit).location" class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
-                      {{ customItem(unit).subtitle }}<span v-if="customItem(unit).subtitle && customItem(unit).location">, </span>{{ customItem(unit).location }}
+                    <p v-if="customItem(unit).subtitle || customItem(unit).location"
+                      class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
+                      {{ customItem(unit).subtitle }}<span
+                        v-if="customItem(unit).subtitle && customItem(unit).location">, </span>{{
+                          customItem(unit).location }}
                     </p>
-                    <p v-if="customItem(unit).description" class="text-[0.8571em] text-slate-600 leading-snug mb-1 text-justify">{{ customItem(unit).description }}</p>
+                    <p v-if="customItem(unit).description"
+                      class="text-[0.8571em] text-slate-600 leading-snug mb-1 text-justify">{{
+                        customItem(unit).description }}</p>
                   </template>
                   <ul v-if="customItem(unit).bullets && customItem(unit).bullets.length > 0 && unit.to > unit.from"
                     class="space-y-1 mt-1 list-none">
                     <li v-for="(bullet, bIdx) in customItem(unit).bullets.slice(unit.from, unit.to)" :key="bIdx"
                       class="text-[0.8571em] text-slate-600 grid grid-cols-[1.5em_1fr] gap-0">
-                      <span class="text-center text-slate-500">{{ customItem(unit).bulletListType === 'ordered' ? (unit.from + bIdx + 1) + '.' : '•' }}</span>
+                      <span class="text-center text-slate-500">{{ customItem(unit).bulletListType === 'ordered' ?
+                        (unit.from + bIdx + 1) +
+                        '.' : '•' }}</span>
                       <span class="text-justify">{{ bullet }}</span>
                     </li>
                   </ul>
@@ -617,7 +703,8 @@ onBeforeUnmount(() => {
           class="cv-footer-block absolute pt-4 border-t border-slate-200"
           style="bottom: var(--print-margin-v); left: var(--print-margin-h); right: var(--print-margin-h);">
           <div class="flex justify-between items-center gap-4">
-            <span v-if="data.personal.showFooterTitle !== false" class="text-[0.6429em] text-slate-400 uppercase tracking-widest">
+            <span v-if="data.personal.showFooterTitle !== false"
+              class="text-[0.6429em] text-slate-400 uppercase tracking-widest">
               {{ t('page', { n: pi + 1 }) }}
             </span>
             <span v-if="data.personal.showLastModified !== false" class="text-[0.6429em] text-slate-400 ml-auto">
@@ -635,7 +722,8 @@ onBeforeUnmount(() => {
       <!-- 总页数（仅屏幕显示） -->
       <div v-if="pages.length > 0" class="no-print text-center py-3 shrink-0"
         :class="layout === 'vertical' ? 'w-full' : 'self-center'">
-        <span class="inline-block px-3 py-1 text-[0.7857em] font-medium text-slate-500 bg-white border border-slate-200 rounded-full shadow-sm">
+        <span
+          class="inline-block px-3 py-1 text-[0.7857em] font-medium text-slate-500 bg-white border border-slate-200 rounded-full shadow-sm">
           {{ t('totalPages', { n: totalPages }) }}
         </span>
       </div>
@@ -651,7 +739,7 @@ onBeforeUnmount(() => {
           <h2 v-if="u.part === 0"
             class="text-[1em] font-bold uppercase tracking-widest border-l-4 pl-3 mb-4 flex items-center gap-2"
             style="color: var(--theme-color); border-color: var(--theme-color);">
-            {{ data.customSections?.find(c => 'custom-' + c.id === u.secId)?.title || 'CUSTOM SECTION' }}
+            {{data.customSections?.find(c => 'custom-' + c.id === u.secId)?.title || 'CUSTOM SECTION'}}
           </h2>
           <div class="pl-1">
             <template v-if="customItem(u)">
@@ -659,14 +747,18 @@ onBeforeUnmount(() => {
                 <h3 class="text-[1em] font-bold text-slate-900">{{ customItem(u).title }}</h3>
                 <span class="text-[0.7857em] text-slate-500 whitespace-nowrap ml-4">{{ customItem(u).dateStr }}</span>
               </div>
-              <p v-if="customItem(u).subtitle || customItem(u).location" class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
-                {{ customItem(u).subtitle }}<span v-if="customItem(u).subtitle && customItem(u).location">, </span>{{ customItem(u).location }}
+              <p v-if="customItem(u).subtitle || customItem(u).location"
+                class="text-[0.8571em] font-semibold text-slate-800 mb-0.5">
+                {{ customItem(u).subtitle }}<span v-if="customItem(u).subtitle && customItem(u).location">, </span>{{
+                  customItem(u).location }}
               </p>
-              <p v-if="customItem(u).description" class="text-[0.8571em] text-slate-600 leading-snug mb-1 text-justify">{{ customItem(u).description }}</p>
+              <p v-if="customItem(u).description" class="text-[0.8571em] text-slate-600 leading-snug mb-1 text-justify">
+                {{ customItem(u).description }}</p>
               <ul v-if="customItem(u).bullets && customItem(u).bullets.length > 0" class="space-y-1 mt-1 list-none">
                 <li v-for="(bullet, bIdx) in customItem(u).bullets" :key="bIdx"
                   class="text-[0.8571em] text-slate-600 grid grid-cols-[1.5em_1fr] gap-0">
-                  <span class="text-center text-slate-500">{{ customItem(u).bulletListType === 'ordered' ? (bIdx + 1) + '.' : '•' }}</span>
+                  <span class="text-center text-slate-500">{{ customItem(u).bulletListType === 'ordered' ? (bIdx + 1) +
+                    '.' : '•' }}</span>
                   <span class="text-justify">{{ bullet }}</span>
                 </li>
               </ul>

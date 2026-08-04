@@ -2,8 +2,9 @@
 import { computed, ref } from 'vue';
 import EditorSection from './EditorSection.vue';
 import LineNumberedTextarea from './LineNumberedTextarea.vue';
+import CollapsibleItemEditor from './CollapsibleItemEditor.vue';
 import IconPicker from './IconPicker.vue';
-import type { CvData } from '../types';
+import type { CvData, CustomItem } from '../types';
 import { parseBibtex } from '../lib/bibtex';
 import { useLocale } from '../composables/useLocale';
 
@@ -17,6 +18,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: CvData): void;
 }>();
+
+// ACADEMIC CONTRIBUTIONS 下四个子模块的折叠状态（默认全展开）
+const collapseSociety = ref(false);
+const collapseReviews = ref(false);
+const collapseContributions = ref(false);
+const collapseFundings = ref(false);
 
 // Mutable proxy
 const data = computed({
@@ -132,6 +139,27 @@ const data = computed({
       });
     }
 
+    // Migrate legacy string[] lists in academic submodules to structured items (与自定义模块条目同构)
+    const migrateStringList = (list: any): CustomItem[] | undefined => {
+      if (!Array.isArray(list) || list.length === 0 || typeof list[0] !== 'string') return undefined;
+      return list.map((s: string) => ({
+        id: generateId(),
+        title: s,
+        subtitle: '',
+        dateStr: '',
+        location: '',
+        description: '',
+        bullets: [] as string[],
+        bulletListType: 'unordered' as const,
+      }));
+    };
+    const mSociety = migrateStringList(val.societyServices);
+    if (mSociety) { val.societyServices = mSociety; modified = true; }
+    const mReviews = migrateStringList(val.reviews);
+    if (mReviews) { val.reviews = mReviews; modified = true; }
+    const mContributions = migrateStringList(val.contributions);
+    if (mContributions) { val.contributions = mContributions; modified = true; }
+
     if (modified) {
       emit('update:modelValue', val);
     }
@@ -139,6 +167,18 @@ const data = computed({
   },
   set: (val) => emit('update:modelValue', val)
 });
+
+// 读取/写入子模块配置（兼容旧数据：subsections 不存在时用默认值）
+const getSub = (key: 'society' | 'reviews' | 'contributions' | 'fundings') => {
+  const s = data.value.sectionSettings.academic?.subsections?.[key];
+  return s || { title: '', visible: true, listType: 'unordered' as const };
+};
+const setSub = (key: 'society' | 'reviews' | 'contributions' | 'fundings', patch: Partial<{ title: string; visible: boolean; listType: 'unordered' | 'ordered' }>) => {
+  if (!data.value.sectionSettings.academic) data.value.sectionSettings.academic = { title: 'ACADEMIC CONTRIBUTIONS', visible: true };
+  if (!data.value.sectionSettings.academic.subsections) data.value.sectionSettings.academic.subsections = {};
+  const cur = data.value.sectionSettings.academic.subsections[key] || { title: '', visible: true, listType: 'unordered' as const };
+  data.value.sectionSettings.academic.subsections[key] = { ...cur, ...patch };
+};
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -290,7 +330,7 @@ const removeContactLink = (idx: number) => {
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors">
           </div>
           <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('documentTitle') || 'Document Title'
-              }}</label><input v-model="data.personal.documentTitle" :disabled="!data.personal.showDocumentTitle"
+          }}</label><input v-model="data.personal.documentTitle" :disabled="!data.personal.showDocumentTitle"
               class="w-full text-xs box-border border border-slate-200 rounded p-2 outline-none focus:border-[#01a3a4] transition-colors disabled:bg-slate-100 disabled:text-slate-400">
           </div>
           <div><label class="block text-[10px] text-slate-500 mb-1 font-bold">{{ t('showDocTitle') }}</label>
@@ -579,7 +619,7 @@ const removeContactLink = (idx: number) => {
             <div v-show="!ar._collapsed" class="mt-3 pt-3 border-t border-[#01a3a4]/20">
               <div class="grid grid-cols-12 gap-3 mb-3">
                 <div class="col-span-12"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('title')
-                    }}</label><input v-model="ar.title"
+                }}</label><input v-model="ar.title"
                     class="w-full font-semibold text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
@@ -587,11 +627,11 @@ const removeContactLink = (idx: number) => {
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-6"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('doi')
-                    }}</label><input v-model="ar.doi"
+                }}</label><input v-model="ar.doi"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('year')
-                    }}</label><input v-model="ar.year"
+                }}</label><input v-model="ar.year"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
@@ -599,7 +639,7 @@ const removeContactLink = (idx: number) => {
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{ t('pages')
-                    }}</label><input v-model="ar.pages"
+                }}</label><input v-model="ar.pages"
                     class="w-full text-xs border border-[#01a3a4]/30 bg-white rounded p-1.5 outline-none focus:border-[#01a3a4]">
                 </div>
                 <div class="col-span-3"><label class="block text-[10px] text-[#01a3a4] font-bold mb-1">{{
@@ -673,7 +713,7 @@ const removeContactLink = (idx: number) => {
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('type')
-                  }}</label><input v-model="cf.type"
+              }}</label><input v-model="cf.type"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white"
                   :placeholder="t('conferenceTypeHint')">
               </div>
@@ -699,7 +739,7 @@ const removeContactLink = (idx: number) => {
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('roleTitle')
-                  }}</label><input v-model="em.role"
+              }}</label><input v-model="em.role"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
@@ -712,11 +752,11 @@ const removeContactLink = (idx: number) => {
               </div>
               <div class="flex gap-2">
                 <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('startDate')
-                    }}</label><input v-model="em.startDate"
+                }}</label><input v-model="em.startDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
                 <div class="w-1/2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('endDate')
-                    }}</label><input v-model="em.endDate"
+                }}</label><input v-model="em.endDate"
                     class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
                 </div>
               </div>
@@ -747,11 +787,11 @@ const removeContactLink = (idx: number) => {
                 class="fa-solid fa-trash text-xs"></i></button>
             <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
               <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('awardTitle')
-                  }}</label><input v-model="aw.title"
+              }}</label><input v-model="aw.title"
                   class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('issuerOrganizer')
-                  }}</label><input v-model="aw.issuer"
+              }}</label><input v-model="aw.issuer"
                   class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
               </div>
               <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
@@ -774,64 +814,150 @@ const removeContactLink = (idx: number) => {
         </div>
       </EditorSection>
 
-      <EditorSection :title="t('researchFundings')" :data="data.fundings" @update="data.fundings = $event"
-        v-model:settings="data.sectionSettings.academic">
-        <div class="space-y-4">
-          <div v-for="(fd, idx) in data.fundings" :key="idx"
-            class="p-3 border border-slate-200 bg-slate-50/50 rounded relative group">
-            <button @click="data.fundings.splice(idx, 1)"
-              class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
-                class="fa-solid fa-trash text-xs"></i></button>
-            <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
-                t('projectTitle') }}</label><input v-model="fd.title"
-                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-              </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
-                t('fundingSource') }}</label><input v-model="fd.source"
-                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-              </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('grantNo') }}</label><input
-                  v-model="fd.grantNo"
-                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-              </div>
-              <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('period') }}</label><input
-                  v-model="fd.period"
-                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-              </div>
-              <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('yourRole')
-                  }}</label><input v-model="fd.role"
-                  class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-              </div>
-            </div>
-          </div>
-          <button
-            @click="data.fundings.push({ id: generateId(), source: '', grantNo: '', title: t('newFunding'), period: '', role: '' })"
-            class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
-              class="fa-solid fa-plus mr-1"></i> {{ t('addFunding') }}</button>
-        </div>
-      </EditorSection>
-
       <EditorSection :title="t('academicContributions')"
-        :data="{ societyServices: data.societyServices, reviews: data.reviews, contributions: data.contributions }"
-        @update="data.societyServices = $event.societyServices; data.reviews = $event.reviews; data.contributions = $event.contributions">
+        :data="{ societyServices: data.societyServices, reviews: data.reviews, contributions: data.contributions, fundings: data.fundings }"
+        @update="data.societyServices = $event.societyServices; data.reviews = $event.reviews; data.contributions = $event.contributions; data.fundings = $event.fundings"
+        v-model:settings="data.sectionSettings.academic">
         <div class="text-xs text-slate-600 mb-4 bg-slate-100 p-3 rounded shadow-inner">
           <i class="fa-solid fa-circle-info text-[#01a3a4] mr-1"></i>
           {{ t('simpleListHint') }}
         </div>
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{
-            t('societyServices') }}
-            <span class="font-normal text-slate-400">({{ data.societyServices.length }} items)</span></label>
+        <!-- 子模块：Societies and Associations（可折叠，可编辑标题/可见性/列表类型） -->
+        <div class="mb-2 border border-slate-200 rounded-lg overflow-hidden">
+          <div class="flex items-center justify-between px-3 py-2 bg-slate-50">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <input type="checkbox" :checked="getSub('society').visible"
+                @change="setSub('society', { visible: ($event.target as HTMLInputElement).checked })"
+                :title="t('toggleVisibility')" class="accent-[#01a3a4] cursor-pointer w-3.5 h-3.5 rounded shrink-0">
+              <input :value="getSub('society').title || 'Societies and Associations'"
+                @input="setSub('society', { title: ($event.target as HTMLInputElement).value })"
+                class="text-xs font-bold text-slate-700 bg-transparent border-b border-dashed border-slate-300 hover:border-slate-400 focus:border-[#01a3a4] focus:border-solid outline-none px-1 py-0.5 flex-1 min-w-0"
+                :placeholder="'Societies and Associations'" />
+              <span class="font-normal text-slate-400 shrink-0 text-[10px]">({{ data.societyServices.length }})</span>
+            </div>
+            <button @click="collapseSociety = !collapseSociety" class="ml-2 shrink-0">
+              <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] transition-transform"
+                :class="{ 'rotate-90': !collapseSociety }"></i>
+            </button>
+          </div>
+          <div v-show="!collapseSociety" class="p-3 bg-white space-y-2">
+            <CollapsibleItemEditor v-for="(item, idx) in data.societyServices" :key="item.id" :item="item"
+              :list="data.societyServices" :index="idx" />
+            <button
+              @click="data.societyServices.push({ id: generateId(), title: t('newItem'), subtitle: '', dateStr: '', location: '', description: '', bullets: [], bulletListType: 'unordered' })"
+              class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
+                class="fa-solid fa-plus mr-1"></i> {{ t('addItem') }}</button>
+          </div>
         </div>
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{ t('reviews') }}
-            <span class="font-normal text-slate-400">({{ data.reviews.length }} items)</span></label>
+
+        <!-- 子模块：Research Services（审稿，可折叠，可编辑标题/可见性/列表类型） -->
+        <div class="mb-2 border border-slate-200 rounded-lg overflow-hidden">
+          <div class="flex items-center justify-between px-3 py-2 bg-slate-50">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <input type="checkbox" :checked="getSub('reviews').visible"
+                @change="setSub('reviews', { visible: ($event.target as HTMLInputElement).checked })"
+                :title="t('toggleVisibility')" class="accent-[#01a3a4] cursor-pointer w-3.5 h-3.5 rounded shrink-0">
+              <input :value="getSub('reviews').title || 'Research Services'"
+                @input="setSub('reviews', { title: ($event.target as HTMLInputElement).value })"
+                class="text-xs font-bold text-slate-700 bg-transparent border-b border-dashed border-slate-300 hover:border-slate-400 focus:border-[#01a3a4] focus:border-solid outline-none px-1 py-0.5 flex-1 min-w-0"
+                :placeholder="'Research Services'" />
+              <span class="font-normal text-slate-400 shrink-0 text-[10px]">({{ data.reviews.length }})</span>
+            </div>
+            <button @click="collapseReviews = !collapseReviews" class="ml-2 shrink-0">
+              <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] transition-transform"
+                :class="{ 'rotate-90': !collapseReviews }"></i>
+            </button>
+          </div>
+          <div v-show="!collapseReviews" class="p-3 bg-white space-y-2">
+            <CollapsibleItemEditor v-for="(item, idx) in data.reviews" :key="item.id" :item="item" :list="data.reviews"
+              :index="idx" />
+            <button
+              @click="data.reviews.push({ id: generateId(), title: t('newItem'), subtitle: '', dateStr: '', location: '', description: '', bullets: [], bulletListType: 'unordered' })"
+              class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
+                class="fa-solid fa-plus mr-1"></i> {{ t('addItem') }}</button>
+          </div>
         </div>
-        <div class="mb-2">
-          <label class="block text-xs font-bold text-slate-700 mb-1 border-l-2 border-[#01a3a4] pl-2">{{
-            t('contributions') }}
-            <span class="font-normal text-slate-400">({{ data.contributions.length }} items)</span></label>
+
+        <!-- 子模块：Academic Contributions（可折叠，可编辑标题/可见性/列表类型） -->
+        <div class="mb-2 border border-slate-200 rounded-lg overflow-hidden">
+          <div class="flex items-center justify-between px-3 py-2 bg-slate-50">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <input type="checkbox" :checked="getSub('contributions').visible"
+                @change="setSub('contributions', { visible: ($event.target as HTMLInputElement).checked })"
+                :title="t('toggleVisibility')" class="accent-[#01a3a4] cursor-pointer w-3.5 h-3.5 rounded shrink-0">
+              <input :value="getSub('contributions').title || 'Academic Contributions'"
+                @input="setSub('contributions', { title: ($event.target as HTMLInputElement).value })"
+                class="text-xs font-bold text-slate-700 bg-transparent border-b border-dashed border-slate-300 hover:border-slate-400 focus:border-[#01a3a4] focus:border-solid outline-none px-1 py-0.5 flex-1 min-w-0"
+                :placeholder="'Academic Contributions'" />
+              <span class="font-normal text-slate-400 shrink-0 text-[10px]">({{ data.contributions.length }})</span>
+            </div>
+            <button @click="collapseContributions = !collapseContributions" class="ml-2 shrink-0">
+              <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] transition-transform"
+                :class="{ 'rotate-90': !collapseContributions }"></i>
+            </button>
+          </div>
+          <div v-show="!collapseContributions" class="p-3 bg-white space-y-2">
+            <CollapsibleItemEditor v-for="(item, idx) in data.contributions" :key="item.id" :item="item"
+              :list="data.contributions" :index="idx" />
+            <button
+              @click="data.contributions.push({ id: generateId(), title: t('newItem'), subtitle: '', dateStr: '', location: '', description: '', bullets: [], bulletListType: 'unordered' })"
+              class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
+                class="fa-solid fa-plus mr-1"></i> {{ t('addItem') }}</button>
+          </div>
+        </div>
+
+        <!-- 子模块：Research Fundings（可折叠，可编辑标题/可见性） -->
+        <div class="mb-2 border border-slate-200 rounded-lg overflow-hidden">
+          <div class="flex items-center justify-between px-3 py-2 bg-slate-50">
+            <div class="flex items-center gap-2 flex-1 min-w-0">
+              <input type="checkbox" :checked="getSub('fundings').visible"
+                @change="setSub('fundings', { visible: ($event.target as HTMLInputElement).checked })"
+                :title="t('toggleVisibility')" class="accent-[#01a3a4] cursor-pointer w-3.5 h-3.5 rounded shrink-0">
+              <input :value="getSub('fundings').title || 'Research Fundings'"
+                @input="setSub('fundings', { title: ($event.target as HTMLInputElement).value })"
+                class="text-xs font-bold text-slate-700 bg-transparent border-b border-dashed border-slate-300 hover:border-slate-400 focus:border-[#01a3a4] focus:border-solid outline-none px-1 py-0.5 flex-1 min-w-0"
+                :placeholder="'Research Fundings'" />
+              <span class="font-normal text-slate-400 shrink-0 text-[10px]">({{ data.fundings.length }})</span>
+            </div>
+            <button @click="collapseFundings = !collapseFundings" class="ml-2 shrink-0">
+              <i class="fa-solid fa-chevron-right text-slate-400 text-[10px] transition-transform"
+                :class="{ 'rotate-90': !collapseFundings }"></i>
+            </button>
+          </div>
+          <div v-show="!collapseFundings" class="p-3 bg-white space-y-3">
+            <div v-for="(fd, idx) in data.fundings" :key="idx"
+              class="p-3 border border-slate-200 bg-slate-50/50 rounded relative group">
+              <button @click="data.fundings.splice(idx, 1)"
+                class="absolute top-2 right-2 text-slate-400 hover:text-red-500 transition-colors"><i
+                  class="fa-solid fa-trash text-xs"></i></button>
+              <div class="grid grid-cols-2 gap-3 mb-2 pr-6">
+                <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                  t('projectTitle') }}</label><input v-model="fd.title"
+                    class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                </div>
+                <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                  t('fundingSource') }}</label><input v-model="fd.source"
+                    class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                </div>
+                <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('grantNo') }}</label><input
+                    v-model="fd.grantNo"
+                    class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                </div>
+                <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('period') }}</label><input
+                    v-model="fd.period"
+                    class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                </div>
+                <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
+                  t('yourRole') }}</label><input v-model="fd.role"
+                    class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
+                </div>
+              </div>
+            </div>
+            <button
+              @click="data.fundings.push({ id: generateId(), source: '', grantNo: '', title: t('newFunding'), period: '', role: '' })"
+              class="w-full py-2.5 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 text-xs font-semibold hover:border-[#01a3a4] hover:text-[#01a3a4] transition-colors"><i
+                class="fa-solid fa-plus mr-1"></i> {{ t('addFunding') }}</button>
+          </div>
         </div>
       </EditorSection>
     </template>
@@ -861,78 +987,8 @@ const removeContactLink = (idx: number) => {
 
           <div class="p-4 bg-white" :class="{ 'opacity-50 grayscale transition-all duration-300': !sec.visible }">
             <div class="space-y-4">
-              <div v-for="(item, iIdx) in sec.items" :key="item.id"
-                class="p-3 border border-slate-200 bg-slate-50/50 rounded relative group">
-
-                <!-- Collapsible header -->
-                <div class="flex items-center justify-between gap-2">
-                  <div class="flex-1 font-bold text-xs text-slate-700 cursor-pointer flex items-center min-w-0"
-                    @click="item._collapsed = !item._collapsed">
-                    <i class="fa-solid fa-chevron-right mr-1 transition-transform inline-block shrink-0"
-                      :class="{ 'rotate-90': !item._collapsed }"></i>
-                    <span class="truncate">{{ item.title || t('untitledItem') }}</span>
-                  </div>
-                  <div class="flex items-center gap-1 shrink-0">
-                    <button @click.stop="moveItem(sec.items, iIdx, -1)" :disabled="iIdx === 0"
-                      class="w-6 h-6 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 disabled:opacity-30 disabled:hover:bg-white shadow-sm flex items-center justify-center"><i
-                        class="fa-solid fa-arrow-up text-[10px]"></i></button>
-                    <button @click.stop="moveItem(sec.items, iIdx, 1)" :disabled="iIdx === sec.items.length - 1"
-                      class="w-6 h-6 rounded bg-white hover:bg-slate-100 border border-slate-200 text-slate-500 disabled:opacity-30 disabled:hover:bg-white shadow-sm flex items-center justify-center"><i
-                        class="fa-solid fa-arrow-down text-[10px]"></i></button>
-                    <button @click.stop="sec.items.splice(iIdx, 1)"
-                      class="w-6 h-6 rounded bg-white hover:bg-red-50 border border-slate-200 text-slate-400 hover:text-red-500 hover:border-red-200 shadow-sm ml-1 flex items-center justify-center"><i
-                        class="fa-solid fa-trash text-[10px]"></i></button>
-                  </div>
-                </div>
-
-                <!-- Collapsible body -->
-                <div v-show="!item._collapsed" class="mt-3 pt-3 border-t border-slate-200">
-                  <div class="grid grid-cols-2 gap-3 mb-2">
-                    <div class="col-span-2"><label class="block text-[10px] text-slate-500 font-bold mb-1">{{
-                      t('itemTitle') }}</label><input v-model="item.title" :placeholder="t('projectName')"
-                        class="w-full font-medium text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-                    </div>
-                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('subtitle')
-                        }}</label><input v-model="item.subtitle"
-                        class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-                    </div>
-                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('date') }}</label><input
-                        v-model="item.dateStr"
-                        class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-                    </div>
-                    <div><label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('location')
-                        }}</label><input v-model="item.location"
-                        class="w-full text-xs border border-slate-200 rounded p-1.5 outline-none focus:border-[#01a3a4] bg-white">
-                    </div>
-                    <div class="col-span-2">
-                      <label class="block text-[10px] text-slate-500 font-bold mb-1">{{ t('description') }}</label>
-                      <LineNumberedTextarea v-model="item.description" :rows="2" />
-                    </div>
-                  </div>
-                  <div class="mt-2 border-t border-slate-200 pt-2">
-                    <div class="flex items-center justify-between mb-1">
-                      <label class="block text-[10px] text-slate-500 font-bold">
-                        {{ t('bulletPoints') }} <span class="font-normal">{{ t('bulletPointsHint') }}</span>
-                      </label>
-                      <div class="inline-flex border border-slate-200 rounded overflow-hidden text-[10px]">
-                        <button type="button" @click="item.bulletListType = 'unordered'"
-                          :class="item.bulletListType !== 'ordered' ? 'bg-[#01a3a4] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'"
-                          class="px-2 py-0.5 transition-colors" :title="t('unorderedList')">
-                          <i class="fa-solid fa-list-ul"></i>
-                        </button>
-                        <button type="button" @click="item.bulletListType = 'ordered'"
-                          :class="item.bulletListType === 'ordered' ? 'bg-[#01a3a4] text-white' : 'bg-white text-slate-500 hover:bg-slate-50'"
-                          class="px-2 py-0.5 transition-colors border-l border-slate-200" :title="t('orderedList')">
-                          <i class="fa-solid fa-list-ol"></i>
-                        </button>
-                      </div>
-                    </div>
-                    <LineNumberedTextarea :model-value="item.bullets?.join('\n')"
-                      @update:model-value="(v: string) => item.bullets = v.split('\n').map(s => s.trim()).filter(s => s)"
-                      :rows="3" />
-                  </div>
-                </div>
-              </div>
+              <CollapsibleItemEditor v-for="(item, iIdx) in sec.items" :key="item.id" :item="item" :list="sec.items"
+                :index="iIdx" />
               <!-- Add Custom Item Button -->
               <button
                 @click="sec.items.push({ id: generateId(), title: t('newItem'), subtitle: '', dateStr: '', location: '', description: '', bullets: [] })"

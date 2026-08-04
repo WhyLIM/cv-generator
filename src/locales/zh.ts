@@ -30,6 +30,11 @@ export const zh = {
   uploadPhoto: '上传照片',
   importBibtex: '导入 BibTeX',
   parseBibtex: '解析并添加',
+  loadSample: '示例数据',
+  loadSampleHint: '加载内置示例数据（将覆盖当前数据）',
+  loadSampleConfirm: '将加载内置示例数据，当前未保存的修改会被覆盖。是否继续？',
+  dataOps: '数据',
+  dataOpsHint: '导入 / 导出 / 示例数据',
 
   // Labels - Personal
   name: '姓名',
@@ -89,6 +94,7 @@ export const zh = {
   bulletPointsHint: '每行一条',
   unorderedList: '无序列表',
   orderedList: '有序列表',
+  listType: '列表类型',
   awardTitle: '奖项名称',
   issuer: '颁发机构',
   issuerOrganizer: '颁发机构',
@@ -113,7 +119,7 @@ export const zh = {
   societyServices: '社会服务',
   reviews: '审稿经历',
   contributions: '学术贡献',
-  simpleListHint: '这些是简单的字符串列表。如需方便地编辑（添加、删除、调整顺序），请切换到上方的 JSON 标签页。',
+  simpleListHint: '每个条目与自定义模块一致，包含标题、副标题、日期、地点、描述与要点列表。点击条目可展开编辑。',
   customSectionDescription: '自定义模块允许您创建全新的简历模块（如：项目经历、志愿服务、证书等），支持自定义标题和通用内容结构。',
   addItemInto: '添加条目到 {section}',
   untitledItem: '无标题条目',
