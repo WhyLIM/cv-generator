@@ -369,7 +369,7 @@ onBeforeUnmount(() => {
           style="border-color: var(--theme-color);">
           <div class="pb-1">
             <h1 class="text-[2.1429em] font-bold text-slate-900 leading-none mb-2">
-              {{ data.personal.name }} <span v-if="data.personal.nameZh" class="font-sans ml-1 font-semibold">({{
+              {{ data.personal.name }} <span v-if="data.personal.nameZh" class="ml-1 font-semibold">({{
                 data.personal.nameZh }})</span>
             </h1>
             <p v-if="data.personal.showDocumentTitle !== false" class="font-medium" style="color: var(--theme-color)">{{
@@ -475,7 +475,7 @@ onBeforeUnmount(() => {
               </h2>
               <div class="pl-1">
                 <div class="flex">
-                  <span class="text-[1em] text-slate-500 w-5 font-mono">{{ unit.part + 1 }}.</span>
+                  <span class="text-[1em] text-slate-500 w-5 shrink-0 leading-snug">{{ unit.part + 1 }}.</span>
                   <div>
                     <p class="text-[1em] text-slate-900 leading-snug">
                       <!-- Author list -->
